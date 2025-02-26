@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- favicons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.prod.website-files.com/5f148310b9588c295ed77f20/6222613fc7d2ef9b8b5312f8_logo-black.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.prod.website-files.com/5f148310b9588c295ed77f20/6222613fc7d2ef9b8b5312f8_logo-black.png">
+
+  <title>A Tour of Polar</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/lib/codemirror.css">
+  <script src="https://unpkg.com/codemirror@5.65.16/lib/codemirror.js"></script>
+  <script src="https://unpkg.com/codemirror@5.65.16/mode/ruby/ruby.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/theme/ruby-blue.css">
+
+  <link rel="stylesheet" href="tw.css" />
+</head>
+
+<body>
+
+  <div class="flex flex-col h-screen w-screen">
+    <header class="bg-indigo-600 text-white">
+      <div class="px-4 py-2">
+        <h1 class="text-2xl font-bold"><img src="https://cdn.prod.website-files.com/5f148310b9588c295ed77f20/6222613fc7d2ef9b8b5312f8_logo-black.png" class="inline h-[1em] mr-1"> A Tour of Polar</h1>
+      </div>
+    </header>
+    <div class="flex flex-1 w-screen">
+      <div class="w-1/2 border-r border-gray-100 p-4">
+        <div id="pageContent"></div>
+        <div class="mt-6 w-full flex gap-4 items-center">
+          <button onclick="previousPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md">&lt;</button>
+          <span class="text-gray-600" id="curPage">${currentPage + 1} / ${values.length}</span>
+          <button onclick="nextPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md">&gt;</button>
+        </div>
+      </div>
+      <div class="w-1/2 flex flex-col">
+        <div id="editor"></div>
+        <div class="w-full bg-gray-100 p-3 flex justify-between">
+          <button onclick="runCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md">Run</button>
+        </div>
+        <div class="w-full flex-grow overflow-x-auto">
+          <pre id="results" class="p-4"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+let currentPage = 0;
+
+const content = [
+  `<h1 class="text-xl mt-4">Hello, User</h1>
+  <div class="flex flex-col gap-2">
+    <p>Welcome to a tour of the <a class="text-indigo-500" href="https://www.osohq.com/docs/oss/reference/polar.html">Polar authorization language.</a></p>
+    <p>The tour is divided into a list of modules that you can access by clicking on <a class="text-indigo-500">A Tour of Polar</a> on the top left of the page.</p>
+    <p>You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
+    <p>Throughout the tour, you will find a series of slides and exercises to complete.</p>
+  </div>`,
+  `<h1 class="text-xl mt-4">Basic Rules</h1>
+  <div class="flex flex-col gap-2">
+    <p>Let's start with the basics of Polar rules and permissions.</p>
+    <p>On the right you'll see an example of a simple policy that gives members viewing permissions on organizations.</p>
+    <p>Try running the code to see how it works! You should see an assertion error. You can fix the assertion error by adding <pre>has_role(User{"alice"}, "member", Organization{"acme"});</pre></p>
+  </div>`
+];
+
+const values = [
+`
+actor User {}
+resource Organization {}
+
+# Members can view organizations
+has_permission(user: User, "view", organization: Organization) if
+  has_role(user, "member", organization);
+
+has_role(User{"alice"}, "member", Organization{"acme"});
+`,
+`
+actor User {}
+resource Organization {}
+
+# Members can view organizations
+has_permission(user: User, "view", organization: Organization) if
+  has_role(user, "member", organization);
+
+# Admins can edit organizations
+has_permission(user: User, "edit", organization: Organization) if
+  has_role(user, "admin", organization);
+
+# Admins inherit all permissions from members
+has_role(user: User, "member", organization: Organization) if
+  has_role(user, "admin", organization);
+
+test "Alice can view Acme" {
+  assert has_permission(User{"alice"}, "view", Organization{"acme"});
+}
+`
+];
+
+var cm = CodeMirror(document.getElementById("editor"), {
+  value: values[currentPage],
+  lineNumbers: true,
+  lineWrapping: true,
+  tabSize: 2,
+  autofocus: true,
+  mode: "ruby"
+});
+
+function previousPage() {
+  if (currentPage > 0) {
+    currentPage--;
+    cm.setValue(values[currentPage]);
+    document.getElementById('pageContent').innerHTML = content[currentPage];
+    updatePageDisplay();
+  }
+}
+
+function nextPage() {
+  if (currentPage < values.length - 1) {
+    currentPage++;
+    cm.setValue(values[currentPage]);
+    document.getElementById('pageContent').innerHTML = content[currentPage];
+    updatePageDisplay();
+  }
+}
+
+function updatePageDisplay() {
+  document.querySelector('#curPage').textContent = `${currentPage + 1} / ${values.length}`;
+}
+
+async function runCode() {
+  const code = cm.getValue();
+  try {
+    const response = await fetch('/.netlify/functions/exec', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ code })
+    });
+    const result = await response.json();
+    let displayResult = 'Policy executed successfully';
+    if (result.error) {
+      const data = JSON.parse(result.error.slice(result.error.indexOf('['), result.error.lastIndexOf(']') + 1));
+      displayResult = data.map(err => err.error_type + ': ' + err.message).join('\n\n');
+    }
+    document.getElementById('results').textContent = displayResult;
+  } catch (error) {
+    document.getElementById('results').textContent = 'Error: ' + error.message;
+  }
+}
+
+// Initialize page display and content
+document.getElementById('pageContent').innerHTML = content[currentPage];
+updatePageDisplay();
+</script>
+
+</html>

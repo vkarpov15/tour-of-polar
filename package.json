@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "oso-cloud": "2.4.4",
+    "tailwindcss": "3.4.0"
+  },
+  "scripts": {
+    "serve": "netlify dev --dir public",
+    "tailwind": "tailwindcss -o ./public/tw.css",
+    "tailwind:watch": "tailwindcss -o ./public/tw.css --watch"
+  },
+  "devDependencies": {
+    "netlify-cli": "^19.0.0"
+  }
+}

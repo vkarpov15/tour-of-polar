@@ -5,7 +5,7 @@ import {
   stopRunningInstance,
 } from '@osohq/dev-server';
 
-let devServerRunning = false;
+let oso = null;
 
 export default async function exec(req, res) {
   try {
@@ -14,16 +14,13 @@ export default async function exec(req, res) {
       throw new Error('Code must be a string');
     }
 
-    if (!devServerRunning) {
+    if (!oso) {
       await configureDevServer();
-      devServerRunning = true;
+      const { url, apiKey } = await getEphemeralOsoKey();
+      oso = new Oso(url, apiKey);
     }
-    const { url, apiKey } = await getEphemeralOsoKey();
-    const oso = new Oso(url, apiKey);
 
     const result = await oso.policy(code) ?? {};
-
-    await stopRunningInstance();
 
     res.status(200).json(result);
   } catch (err) {

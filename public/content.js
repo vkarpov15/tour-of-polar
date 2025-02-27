@@ -41,7 +41,17 @@ resource Organization {}
 has_permission(user: User, "view", organization: Organization) if
   has_role(user, "member", organization);
 
-has_role(User{"alice"}, "member", Organization{"acme"});
+# Admins can edit organizations
+has_permission(user: User, "edit", organization: Organization) if
+  has_role(user, "admin", organization);
+
+# Admins inherit all permissions from members
+has_role(user: User, "member", organization: Organization) if
+  has_role(user, "admin", organization);
+
+test "Alice can view Acme" {
+  assert has_permission(User{"alice"}, "view", Organization{"acme"});
+}
     `,
     title: 'Basic Rules',
     description: 'Learn how to write simple rules and permissions in Polar'

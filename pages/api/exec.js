@@ -1,8 +1,7 @@
 import { Oso } from 'oso-cloud';
 import {
   configureDevServer,
-  getEphemeralOsoKey,
-  stopRunningInstance,
+  getEphemeralOsoKey
 } from '@osohq/dev-server';
 
 let oso = null;

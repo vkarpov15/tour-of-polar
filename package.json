@@ -6,6 +6,7 @@
     "tailwindcss": "3.4.0"
   },
   "scripts": {
+    "build": "npm run tailwind && next build",
     "dev": "next dev",
     "tailwind": "tailwindcss -o ./public/tw.css",
     "tailwind:watch": "tailwindcss -o ./public/tw.css --watch"

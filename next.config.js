@@ -4,7 +4,11 @@ module.exports = {
   async rewrites() {
     return [
       {
-        source: '/:number(\\d+)',
+        source: '/list',
+        destination: '/list.html'
+      },
+      {
+        source: '/:chapter/:number(\\d+)',
         destination: '/index.html',
       },
       {

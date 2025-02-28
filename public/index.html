@@ -13,26 +13,37 @@
   <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/lib/codemirror.css">
   <script src="https://unpkg.com/codemirror@5.65.16/lib/codemirror.js"></script>
   <script src="https://unpkg.com/codemirror@5.65.16/mode/ruby/ruby.js"></script>
-  <script src="content.js"></script>
+  <script src="/content.js"></script>
 
   <style>
     .CodeMirror { height: 100%; }
     #drag-bar {
-      padding: 3px;
+      padding: 2px;
       cursor: row-resize;
+      background-color: silver;
+    }
+
+    #drag-bar-vert {
+      padding: 2px;
+      cursor: col-resize;
       background-color: silver;
     }
   </style>
 
-  <link rel="stylesheet" href="tw.css" />
+  <link rel="stylesheet" href="/tw.css" />
 </head>
 
 <body>
 
   <div class="flex flex-col h-screen w-screen">
-    <header class="bg-indigo-600 text-white">
+    <header class="bg-indigo-600 text-white flex justify-between">
       <div class="px-4 py-2">
-        <h1 class="text-2xl font-bold"><img src="https://www.osohq.com/docs/logo-bear-white.png" class="inline h-[1em] mr-1"> A Tour of Polar</h1>
+        <h1 class="text-2xl font-bold"><a href="/"><img src="https://www.osohq.com/docs/logo-bear-white.png" class="inline h-[1em] mr-1"> A Tour of Polar</a></h1>
+      </div>
+      <div>
+        <a href="/list"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 m-2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg></a>
       </div>
     </header>
     <div class="flex flex-1 w-screen">
@@ -40,10 +51,11 @@
         <div id="pageContent" class="flex-grow"></div>
         <div class="w-full flex gap-4 items-center">
           <button onclick="previousPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md">&lt;</button>
-          <span class="text-gray-600" id="curPage">${currentPage + 1} / ${content.length}</span>
+          <span class="text-gray-600" id="curPage"></span>
           <button onclick="nextPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md">&gt;</button>
         </div>
       </div>
+      <div id="drag-bar-vert"></div>
       <div class="w-1/2 flex flex-col h-[calc(100vh-48px)] overflow-hidden">
         <div id="editor" class="h-1/2"></div>
         <div id="drag-bar"></div>
@@ -51,7 +63,9 @@
           <div class="w-full bg-gray-100 p-3 flex justify-between">
             <button id="runButton" onclick="runCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-slate-500">Run</button>
           </div>
-          <pre id="results" class="p-4 h-[calc(100%-64px)] overflow-y-auto"></pre>
+          <pre id="results" class="p-4 h-[calc(100%-64px)] overflow-y-auto relative">
+            <img src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6793da36f7a5080d73228681_File%20Sharing%20Bear.png" class="absolute bottom-0 h-48 left-1/2 -translate-x-1/2">
+          </pre>
         </div>
       </div>
     </div>
@@ -59,30 +73,46 @@
 </body>
 
 <script>
+let currentChapter = Object.keys(content)[0];
 let currentPage = 0;
 
 function previousPage() {
   if (currentPage > 0) {
     currentPage--;
-    cm.setValue(content[currentPage].code);
-    document.getElementById('pageContent').innerHTML = content[currentPage].text;
-    updatePageDisplay();
-    history.pushState(null, '', currentPage === 0 ? '/' : `/${currentPage + 1}`);
+  } else if (Object.keys(content).indexOf(currentChapter) > 0) {
+    currentChapter = Object.keys(content)[Object.keys(content).indexOf(currentChapter) - 1];
+    currentPage = content[currentChapter].length - 1;
+  } else {
+    return;
   }
+  updatePage();
 }
 
 function nextPage() {
-  if (currentPage < content.length - 1) {
+  if (currentPage < content[currentChapter].length - 1) {
     currentPage++;
-    cm.setValue(content[currentPage].code.trim());
-    document.getElementById('pageContent').innerHTML = content[currentPage].text;
-    updatePageDisplay();
-    history.pushState(null, '', `/${currentPage + 1}`);
+  } else if (Object.keys(content).indexOf(currentChapter) < Object.keys(content).length - 1) {
+    currentChapter = Object.keys(content)[Object.keys(content).indexOf(currentChapter) + 1];
+    currentPage = 0;
+  } else {
+    return;
   }
+  updatePage();
+}
+
+function updatePage() {
+  const page = content[currentChapter][currentPage];
+  cm.setValue(page.code.trim());
+  document.getElementById('pageContent').innerHTML = page.text;
+  document.getElementById('results').innerHTML = '<img src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6793da36f7a5080d73228681_File%20Sharing%20Bear.png" class="absolute bottom-0 h-48 left-1/2 -translate-x-1/2">';
+  updatePageDisplay();
+  const chapterSlug = chapterSlugs[currentChapter];
+  history.pushState(null, '', `/${chapterSlug}/${currentPage + 1}`);
 }
 
 function updatePageDisplay() {
-  document.querySelector('#curPage').textContent = `${currentPage + 1} / ${content.length}`;
+  const totalPages = content[currentChapter].length;
+  document.querySelector('#curPage').textContent = `${currentPage + 1} / ${totalPages}`;
 }
 
 async function runCode() {
@@ -117,22 +147,31 @@ async function runCode() {
   }
 }
 
-// Get page from URL
+// Get chapter and page from URL
 const path = window.location.pathname;
-currentPage = path === '/' ? 0 : parseInt(path.slice(1)) - 1;
-if (Number.isNaN(currentPage)) {
-  currentPage = 0;
+if (path !== '/') {
+  const [, chapterSlug, pageNum] = path.split('/');
+  const chapter = Object.keys(content).find(c => chapterSlugs[c] === chapterSlug);
+  if (chapter) {
+    currentChapter = chapter;
+    currentPage = parseInt(pageNum) - 1;
+    if (isNaN(currentPage) || currentPage < 0 || currentPage >= content[currentChapter].length) {
+      currentPage = 0;
+    }
+  }
 }
 
 // Initialize page display and content
-document.getElementById('pageContent').innerHTML = content[currentPage].text;
+const initialPage = content[currentChapter][currentPage];
+document.getElementById('pageContent').innerHTML = initialPage.text;
 updatePageDisplay();
 
 // Set initial URL
-history.replaceState(null, '', currentPage === 0 ? '/' : `/${currentPage + 1}`);
+const initialChapterSlug = chapterSlugs[currentChapter];
+history.replaceState(null, '', `/${initialChapterSlug}/${currentPage + 1}`);
 
 var cm = CodeMirror(document.getElementById("editor"), {
-  value: content[currentPage].code.trim(),
+  value: initialPage.code.trim(),
   lineNumbers: true,
   lineWrapping: true,
   tabSize: 2,
@@ -142,6 +181,7 @@ var cm = CodeMirror(document.getElementById("editor"), {
 
 // Drag bar functionality
 window.addEventListener('DOMContentLoaded', () => {
+  // Vertical drag bar
   const dragBar = document.getElementById('drag-bar');
   const editorDiv = document.getElementById('editor');
   const resultsDiv = document.getElementById('results').parentElement;
@@ -176,6 +216,42 @@ window.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('mouseup', () => {
     isDragging = false;
+  });
+
+  // Horizontal drag bar
+  const dragBarVert = document.getElementById('drag-bar-vert');
+  const leftPanel = dragBarVert.previousElementSibling;
+  const rightPanel = dragBarVert.nextElementSibling;
+  let isDraggingVert = false;
+  let initialMouseX = 0;
+  let initialLeftWidth = 0;
+
+  dragBarVert.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    isDraggingVert = true;
+    initialMouseX = e.clientX || e.pageX;
+    initialLeftWidth = leftPanel.offsetWidth;
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDraggingVert) {
+      const mouseX = e.clientX || e.pageX;
+      const containerWidth = leftPanel.parentElement.offsetWidth;
+
+      const mouseMovementX = mouseX - initialMouseX;
+      const newLeftWidth = Math.max(initialLeftWidth + mouseMovementX, 0);
+
+      const leftWidth = (newLeftWidth / containerWidth) * 100;
+      const rightWidth = 100 - leftWidth;
+
+      leftPanel.style.width = `${leftWidth}%`;
+      rightPanel.style.width = `${rightWidth}%`;
+      cm.refresh();
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDraggingVert = false;
   });
 });
 </script>

@@ -7,6 +7,12 @@ const content = [
   <p>The tour is divided into a list of modules that you can access by clicking on <a class="text-indigo-500">A Tour of Polar</a> on the top left of the page.</p>
   <p>You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
   <p>Throughout the tour, you will find a series of slides and exercises to complete.</p>
+  <p>You can use the following keyboard shortcuts:</p>
+  <ul class="list-disc ml-6">
+    <li><code>Shift+Enter</code>: Run code</li>
+    <li><code>Page Up</code>: Previous page</li>
+    <li><code>Page Down</code>: Next page</li>
+  </ul>
 </div>
     `,
     code: `

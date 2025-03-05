@@ -50,9 +50,9 @@
       <div class="w-1/2 border-r border-gray-100 p-4 flex flex-col gap-6">
         <div id="pageContent" class="flex-grow"></div>
         <div class="w-full flex gap-4 items-center">
-          <button onclick="previousPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md">&lt;</button>
+          <button id="prevButton" onclick="previousPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-gray-400">&lt;</button>
           <span class="text-gray-600" id="curPage"></span>
-          <button onclick="nextPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md">&gt;</button>
+          <button id="nextButton" onclick="nextPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-gray-400">&gt;</button>
         </div>
       </div>
       <div id="drag-bar-vert"></div>
@@ -116,6 +116,14 @@ function updatePage(pushState) {
 function updatePageDisplay() {
   const totalPages = content[currentChapter].length;
   document.querySelector('#curPage').textContent = `${currentPage + 1} / ${totalPages}`;
+
+  // Disable next button if current chapter is "wrapping-up"
+  const nextButton = document.getElementById('nextButton');
+  nextButton.disabled = currentChapter === 'Wrapping Up';
+
+  // Disable prev button if first page of Basics chapter
+  const prevButton = document.getElementById('prevButton');
+  prevButton.disabled = currentChapter === 'Basics' && currentPage === 0;
 }
 
 async function runCode() {

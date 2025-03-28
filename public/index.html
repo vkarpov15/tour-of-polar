@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark:bg-gray-900">
 
 <head>
   <!-- favicons -->
@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/lib/codemirror.css">
   <script src="https://unpkg.com/codemirror@5.65.16/lib/codemirror.js"></script>
   <script src="https://unpkg.com/codemirror@5.65.16/mode/ruby/ruby.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/theme/monokai.css">
   <script src="/content.js"></script>
 
   <style>
@@ -20,53 +21,70 @@
     #drag-bar {
       padding: 2px;
       cursor: row-resize;
-      background-color: silver;
     }
 
     #drag-bar-vert {
       padding: 2px;
       cursor: col-resize;
-      background-color: silver;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .CodeMirror {
+        background: #1a1a1a;
+        color: #fff;
+      }
+      .CodeMirror-gutters {
+        background: #1a1a1a;
+        border-right: 1px solid #333;
+      }
+      .CodeMirror-linenumber {
+        color: #666;
+      }
     }
   </style>
 
   <link rel="stylesheet" href="/tw.css" />
 </head>
 
-<body>
+<body class="dark:bg-gray-900 dark:text-white">
 
   <div class="flex flex-col h-screen w-screen">
-    <header class="bg-indigo-600 text-white flex justify-between">
+    <header class="bg-indigo-600 text-white flex justify-between dark:bg-indigo-900">
       <div class="px-4 py-2">
         <h1 class="text-2xl font-bold"><a href="/"><img src="https://www.osohq.com/docs/logo-bear-white.png" class="inline h-[1em] mr-1"> A Tour of Polar</a></h1>
       </div>
-      <div>
+      <div class="flex items-center">
+        <button onclick="toggleDarkMode()" class="p-2 mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+          </svg>
+        </button>
         <a href="/list"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 m-2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg></a>
       </div>
     </header>
     <div class="flex flex-1 w-screen">
-      <div class="w-1/2 border-r border-gray-100 p-4 flex flex-col gap-6">
-        <div id="pageContent" class="flex-grow"></div>
+      <div class="w-1/2 border-r border-gray-100 p-4 flex flex-col gap-6 dark:border-gray-700">
+        <div id="pageContent" class="flex-grow dark:text-gray-300"></div>
         <div class="w-full flex flex-col gap-2">
           <div class="flex gap-4 items-center">
-            <button id="prevButton" onclick="previousPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-gray-400">&lt;</button>
-            <span class="text-gray-600" id="curPage"></span>
-            <button id="nextButton" onclick="nextPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-gray-400">&gt;</button>
+            <button id="prevButton" onclick="previousPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-gray-400 dark:bg-indigo-800 dark:hover:bg-indigo-700">&lt;</button>
+            <span class="text-gray-600 dark:text-gray-400" id="curPage"></span>
+            <button id="nextButton" onclick="nextPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-gray-400 dark:bg-indigo-800 dark:hover:bg-indigo-700">&gt;</button>
           </div>
-          <div class="text-gray-600 text-center text-sm font-bold" id="chapterTitle"></div>
+          <div class="text-gray-600 text-sm font-bold dark:text-gray-400" id="chapterTitle"></div>
         </div>
       </div>
-      <div id="drag-bar-vert"></div>
+      <div id="drag-bar-vert" class="bg-gray-300 dark:bg-gray-700"></div>
       <div class="w-1/2 flex flex-col h-[calc(100vh-48px)] overflow-hidden">
         <div id="editor" class="h-1/2"></div>
-        <div id="drag-bar"></div>
+        <div id="drag-bar" class="bg-gray-300 dark:bg-gray-700"></div>
         <div class="w-full h-1/2">
-          <div class="w-full bg-gray-100 p-3 flex justify-between">
-            <button id="runButton" onclick="runCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-slate-500">Run</button>
+          <div class="w-full bg-gray-100 p-3 flex justify-between dark:bg-gray-800">
+            <button id="runButton" onclick="runCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-slate-500 dark:bg-indigo-800 dark:hover:bg-indigo-700">Run</button>
           </div>
-          <pre id="results" class="p-4 h-[calc(100%-64px)] overflow-y-auto relative">
+          <pre id="results" class="p-4 h-[calc(100%-64px)] overflow-y-auto relative dark:text-gray-300">
             <img src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6793da36f7a5080d73228681_File%20Sharing%20Bear.png" class="absolute bottom-0 h-48 left-1/2 -translate-x-1/2">
           </pre>
         </div>
@@ -185,6 +203,28 @@ updatePageDisplay();
 const initialChapterSlug = chapterSlugs[currentChapter];
 history.replaceState(null, '', `/${initialChapterSlug}/${currentPage + 1}`);
 
+const cm = CodeMirror(document.getElementById("editor"), {
+  value: initialPage.code.trim(),
+  lineNumbers: true,
+  lineWrapping: true,
+  tabSize: 2,
+  autofocus: true,
+  mode: "ruby",
+  theme: document.documentElement.classList.contains('dark') ? 'monokai' : 'default',
+  extraKeys: {
+    "Shift-Enter": function(cm) {
+      runCode();
+    }
+  }
+});
+
+// Check for dark mode preference
+if (localStorage.getItem('darkMode') === 'true' ||
+    (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.documentElement.classList.add('dark');
+  cm.setOption('theme', 'monokai');
+}
+
 window.addEventListener('popstate', () => {
   const path = window.location.pathname;
   if (path !== '/') {
@@ -209,20 +249,6 @@ window.addEventListener('keydown', (e) => {
   } else if (e.key === 'PageDown') {
     e.preventDefault();
     nextPage();
-  }
-});
-
-var cm = CodeMirror(document.getElementById("editor"), {
-  value: initialPage.code.trim(),
-  lineNumbers: true,
-  lineWrapping: true,
-  tabSize: 2,
-  autofocus: true,
-  mode: "ruby",
-  extraKeys: {
-    "Shift-Enter": function(cm) {
-      runCode();
-    }
   }
 });
 
@@ -301,6 +327,12 @@ window.addEventListener('DOMContentLoaded', () => {
     isDraggingVert = false;
   });
 });
+
+function toggleDarkMode() {
+  document.documentElement.classList.toggle('dark');
+  localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+  cm.setOption('theme', document.documentElement.classList.contains('dark') ? 'monokai' : 'default');
+}
 </script>
 
 </html>

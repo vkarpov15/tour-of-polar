@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark:bg-gray-900">
 
 <head>
   <!-- favicons -->
@@ -18,14 +18,19 @@
   <link rel="stylesheet" href="tw.css" />
 </head>
 
-<body>
+<body class="dark:bg-gray-900 dark:text-white">
 
   <div class="flex flex-col h-screen w-screen">
     <header class="bg-indigo-600 text-white flex justify-between">
       <div class="px-4 py-2">
         <h1 class="text-2xl font-bold"><a href="/"><img src="https://www.osohq.com/docs/logo-bear-white.png" class="inline h-[1em] mr-1"> A Tour of Polar</a></h1>
       </div>
-      <div>
+      <div class="flex items-center">
+        <button onclick="toggleDarkMode()" class="p-2 mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+          </svg>
+        </button>
         <a href="/list"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 m-2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg></a>
@@ -41,200 +46,200 @@
         <div class="flex flex-col gap-4">
           <div class="text-xl font-bold">Basics</div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/basics/1">
-              <div class="text-xl">Hello, World</div>
-              <div>
-                Learn how to use this tour
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/basics/1" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Hello, World</p>
+                <p class="truncate text-sm text-gray-500">Learn how to use this tour</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/basics/2">
-              <div class="text-xl">Basic Rules</div>
-              <div>
-                Learn how to write simple rules and permissions in Polar
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/basics/2" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Basic Rules</p>
+                <p class="truncate text-sm text-gray-500">Learn how to write simple rules and permissions in Polar</p>
+              </a>
+            </div>
           </div>
         </div>
 
         <div class="flex flex-col gap-4">
           <div class="text-xl font-bold">Role-Based Access Control (RBAC)</div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rbac/1">
-              <div class="text-xl">Multitenant Roles</div>
-              <div>
-                Learn how to use roles to simplify your authorization logic
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rbac/1" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Multitenant Roles</p>
+                <p class="truncate text-sm text-gray-500">Learn how to use roles to simplify your authorization logic</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rbac/2">
-              <div class="text-xl">Resource-Specific Roles</div>
-              <div>
-                Learn how to implement fine-grained access control with resource-specific roles
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rbac/2" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Resource-Specific Roles</p>
+                <p class="truncate text-sm text-gray-500">Learn how to implement fine-grained access control with resource-specific roles</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rbac/3">
-              <div class="text-xl">Global Roles</div>
-              <div>
-                Learn how to implement global roles that span your entire application
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rbac/3" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Global Roles</p>
+                <p class="truncate text-sm text-gray-500">Learn how to implement global roles that span your entire application</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rbac/4">
-              <div class="text-xl">Inheriting Roles</div>
-              <div>
-                Learn how to inherit roles between related resources
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rbac/4" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Inheriting Roles</p>
+                <p class="truncate text-sm text-gray-500">Learn how to inherit roles between related resources</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rbac/5">
-              <div class="text-xl">Resource Ownership</div>
-              <div>
-                Learn how to grant additional permissions to resource owners
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rbac/5" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Resource Ownership</p>
+                <p class="truncate text-sm text-gray-500">Learn how to grant additional permissions to resource owners</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rbac/6">
-              <div class="text-xl">Resource Sharing</div>
-              <div>
-                Learn how to share resources and control access at a granular level
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rbac/6" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Resource Sharing</p>
+                <p class="truncate text-sm text-gray-500">Learn how to share resources and control access at a granular level</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rbac/7">
-              <div class="text-xl">Custom Roles</div>
-              <div>
-                Learn how to implement flexible custom roles for different organization needs
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rbac/7" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Custom Roles</p>
+                <p class="truncate text-sm text-gray-500">Learn how to implement flexible custom roles for different organization needs</p>
+              </a>
+            </div>
           </div>
         </div>
 
         <div class="flex flex-col gap-4">
           <div class="text-xl font-bold">Relationship-Based Access Control (ReBAC)</div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rebac/1">
-              <div class="text-xl">Relationship-Based Access Control (ReBAC)</div>
-              <div>
-                Learn how to organize permissions based on relationships between resources
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rebac/1" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Relationship-Based Access Control (ReBAC)</p>
+                <p class="truncate text-sm text-gray-500">Learn how to organize permissions based on relationships between resources</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rebac/2">
-              <div class="text-xl">Files & Folders</div>
-              <div>
-                Learn how to implement hierarchical file/folder permissions
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rebac/2" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Files & Folders</p>
+                <p class="truncate text-sm text-gray-500">Learn how to implement hierarchical file/folder permissions</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rebac/3">
-              <div class="text-xl">User-Resource Relationships</div>
-              <div>
-                Learn how relationships between users and resources affect permissions
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rebac/3" class="focus:outline-none">
+                <p class="font-medium text-gray-900">User-Resource Relationships</p>
+                <p class="truncate text-sm text-gray-500">Learn how relationships between users and resources affect permissions</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rebac/4">
-              <div class="text-xl">Impersonation</div>
-              <div>
-                Learn how to implement user impersonation for support and admin scenarios
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rebac/4" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Impersonation</p>
+                <p class="truncate text-sm text-gray-500">Learn how to implement user impersonation for support and admin scenarios</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/rebac/5">
-              <div class="text-xl">Organization Hierarchies</div>
-              <div>
-                Learn how to implement authorization based on organizational reporting structures
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/rebac/5" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Organization Hierarchies</p>
+                <p class="truncate text-sm text-gray-500">Learn how to implement authorization based on organizational reporting structures</p>
+              </a>
+            </div>
           </div>
         </div>
 
         <div class="flex flex-col gap-4">
           <div class="text-xl font-bold">Attribute-Based Access Control (ABAC)</div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/abac/1">
-              <div class="text-xl">Public/Private Resources</div>
-              <div>
-                Learn how attributes and characteristics of resources control access to them
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/abac/1" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Public/Private Resources</p>
+                <p class="truncate text-sm text-gray-500">Learn how attributes and characteristics of resources control access to them</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/abac/2">
-              <div class="text-xl">Conditional Roles</div>
-              <div>
-                Learn how to implement conditional roles based on organization preferences
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/abac/2" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Conditional Roles</p>
+                <p class="truncate text-sm text-gray-500">Learn how to implement conditional roles based on organization preferences</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/abac/3">
-              <div class="text-xl">Role Toggles</div>
-              <div>
-                Learn how to implement toggles and switches to control access
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/abac/3" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Role Toggles</p>
+                <p class="truncate text-sm text-gray-500">Learn how to implement toggles and switches to control access</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/abac/4">
-              <div class="text-xl">Time-Based Checks</div>
-              <div>
-                Learn how to implement access controls that expire after a period of time
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/abac/4" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Time-Based Checks</p>
+                <p class="truncate text-sm text-gray-500">Learn how to implement access controls that expire after a period of time</p>
+              </a>
+            </div>
           </div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/abac/5">
-              <div class="text-xl">Entitlements</div>
-              <div>
-                Learn how to implement subscription-based access control with entitlements and quotas
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/abac/5" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Entitlements</p>
+                <p class="truncate text-sm text-gray-500">Learn how to implement subscription-based access control with entitlements and quotas</p>
+              </a>
+            </div>
           </div>
         </div>
 
         <div class="flex flex-col gap-4">
           <div class="text-xl font-bold">Wrapping Up</div>
 
-          <div class="bg-indigo-200 px-2 py-4">
-            <a href="/wrapping-up/1">
-              <div class="text-xl">Wrapping Up</div>
-              <div>
-                Learn where to go next in your authorization journey
-              </div>
-            </a>
+          <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <a href="/wrapping-up/1" class="focus:outline-none">
+                <p class="font-medium text-gray-900">Wrapping Up</p>
+                <p class="truncate text-sm text-gray-500">Learn where to go next in your authorization journey</p>
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -242,5 +247,12 @@
 
   </div>
 </body>
+
+<script>
+function toggleDarkMode() {
+  document.documentElement.classList.toggle('dark');
+  localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+}
+</script>
 
 </html>

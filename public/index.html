@@ -49,10 +49,13 @@
     <div class="flex flex-1 w-screen">
       <div class="w-1/2 border-r border-gray-100 p-4 flex flex-col gap-6">
         <div id="pageContent" class="flex-grow"></div>
-        <div class="w-full flex gap-4 items-center">
-          <button id="prevButton" onclick="previousPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-gray-400">&lt;</button>
-          <span class="text-gray-600" id="curPage"></span>
-          <button id="nextButton" onclick="nextPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-gray-400">&gt;</button>
+        <div class="w-full flex flex-col gap-2">
+          <div class="flex gap-4 items-center">
+            <button id="prevButton" onclick="previousPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-gray-400">&lt;</button>
+            <span class="text-gray-600" id="curPage"></span>
+            <button id="nextButton" onclick="nextPage()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-gray-400">&gt;</button>
+          </div>
+          <div class="text-gray-600 text-center text-sm font-bold" id="chapterTitle"></div>
         </div>
       </div>
       <div id="drag-bar-vert"></div>
@@ -116,6 +119,7 @@ function updatePage(pushState) {
 function updatePageDisplay() {
   const totalPages = content[currentChapter].length;
   document.querySelector('#curPage').textContent = `${currentPage + 1} / ${totalPages}`;
+  document.querySelector('#chapterTitle').textContent = currentChapter;
 
   // Disable next button if current chapter is "wrapping-up"
   const nextButton = document.getElementById('nextButton');

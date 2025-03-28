@@ -32,15 +32,15 @@ resource Organization {}
     text: `
 <h1 class="text-xl mt-4 mb-2">Basic Rules</h1>
 <div class="flex flex-col gap-2">
-  <p>Let's start with the basics of Polar rules and permissions.</p>
+  <p>Let's start with the basics of how to write a policy on Polar.</p>
   <p>On the right you'll see an example of a simple policy that gives members viewing permissions on organizations.</p>
   <p>The policy code is divided into two main parts:</p>
   <ul class="list-disc ml-6">
     <li>The rules section at the top (including actor/resource definitions and permission rules) define what actions are allowed</li>
-    <li>The test section at the bottom verifies that the policy works as expected by asserting specific permissions</li>
+    <li>The test section at the bottom verifies that the policy works as expected given some data defined in <code>setup {}</code></li>
   </ul>
   <p>Try running the code! You should see an assertion error because the test expects Alice to have view permission, but we haven't granted her the required member role yet.</p>
-  <p>You can fix the assertion error by adding <pre>has_role(User{"alice"}, "member", Organization{"acme"});</pre> anywhere in the policy code.</p>
+  <p>You can fix the assertion error by uncommenting the <pre>has_role(User{"alice"}, "owner", Item{"foo"});</pre> line.</p>
 </div>
     `,
     code: `
@@ -48,26 +48,34 @@ resource Organization {}
 # Rules section:
 ################
 actor User {}
-resource Organization {
-roles = ["admin", "member"];
-  permissions = ["view"];
+resource Item {
+  roles = ["viewer", "owner"];
+  permissions = ["view", "edit"];
 
-  # Admins inherit all permissions from members
-  "member" if "admin";
-
-  # Members can view organizations
-  "view" if "member";
+  "view" if "viewer";
+  "edit" if "owner";
+  "viewer" if "owner";
 }
-
-
-has_role(user: User, "member", organization: Organization) if
-  has_role(user, "admin", organization);
 
 ###############
 # Test section:
 ###############
-test "Alice can view Acme" {
-  assert has_permission(User{"alice"}, "view", Organization{"acme"});
+test "Viewers can view items" {
+  setup {
+    # This code defines a _fact_ in Oso. Facts are a flexible data model for representing authorization data.
+    # The following fact says that "alice" has the role "viewer" on the item "foo".
+    has_role(User{"alice"}, "viewer", Item{"foo"});
+  }
+  assert has_permission(User{"alice"}, "view", Item{"foo"});
+  assert_not has_permission(User{"alice"}, "edit", Item{"foo"});
+}
+
+test "Owners can view and edit items" {
+  setup {
+    # has_role(User{"alice"}, "owner", Item{"foo"});
+  }
+  assert has_permission(User{"alice"}, "view", Item{"foo"});
+  assert has_permission(User{"alice"}, "edit", Item{"foo"});
 }
     `,
     title: 'Basic Rules',

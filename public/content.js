@@ -35,15 +35,52 @@ resource Organization {}
     text: `
 <h1 class="text-xl mt-4 mb-2">Basic Rules</h1>
 <div class="flex flex-col gap-2">
-  <p>Let's start with the basics of how to write a policy on Polar.</p>
+<p>Now that you've seen how to define resources in Polar, let's learn how roles and permissions work together in a Polar policy.</p>
+<p>
+  The code on the right demonstrates a common pattern - an Item resource that has:
+</p>
+<ul class="list-disc ml-6">
+  <li>Defined roles (viewer, owner)</li>
+  <li>Defined permissions (view, edit)</li>
+  <li>Rules mapping roles to permissions</li>
+</ul>
+<p>This introduces two key concepts - using roles to group related permissions, and defining rules to determine when permissions are granted.</p>
+<p>Try running the code! You should see that the policy executed successfully.</p>
+</div>
+    `,
+    code: `
+actor User {}
+resource Item {
+  roles = ["viewer", "owner"];
+  permissions = ["view", "edit"];
+
+  "view" if "viewer";
+  "edit" if "owner";
+  "viewer" if "owner";
+}
+    `,
+    title: 'Basic Rules',
+    description: 'Learn how to write simple rules and permissions in Polar',
+    chapter: 'Basics'
+  },
+
+
+  {
+    text: `
+<h1 class="text-xl mt-4 mb-2">Introducing Testing</h1>
+<div class="flex flex-col gap-2">
+  <p>Next, let's take a look at how to write policy tests in Polar. Tests let you check that your policies do what you expect.</p>
   <p>On the right you'll see an example of a simple policy that gives members viewing permissions on organizations.</p>
   <p>The policy code is divided into two main parts:</p>
-  <ul class="list-disc ml-6">
+  <ol class="list-disc ml-6">
     <li>The rules section at the top (including actor/resource definitions and permission rules) define what actions are allowed</li>
     <li>The test section at the bottom verifies that the policy works as expected given some data defined in <code>setup {}</code></li>
-  </ul>
-  <p>Try running the code! You should see an assertion error because the test expects Alice to have view permission, but we haven't granted her the required member role yet.</p>
-  <p>You can fix the assertion error by uncommenting the <pre>has_role(User{"alice"}, "owner", Item{"foo"});</pre> line.</p>
+  </ol>
+  <p>
+    Try running the code! So far, policies in this tour executed without any errors. This policy includes an intentional error to demonstrate what happens when tests fail. The test expects Alice to have view permission, but we haven't granted her the required member role yet.
+  </p>
+  <p>You can fix the assertion error by uncommenting line 29:</p>
+  <pre class="inline">has_role(User{"alice"}, "owner", Item{"foo"});</pre>
 </div>
     `,
     code: `
@@ -81,8 +118,8 @@ test "Owners can view and edit items" {
   assert has_permission(User{"alice"}, "edit", Item{"foo"});
 }
     `,
-    title: 'Basic Rules',
-    description: 'Learn how to write simple rules and permissions in Polar',
+    title: 'Introducing Testing',
+    description: 'Learn how to write test cases in Polar',
     chapter: 'Basics'
   },
 
@@ -106,6 +143,9 @@ test "Owners can view and edit items" {
       <li>Testing that permissions work correctly across resources</li>
     </ul>
     <p>Take a look at the tests to understand how resource-specific roles enable fine-grained access control, and run them to validate that the policy works correctly!</p>
+    <div class="mt-4 w-full text-center">
+      <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/64ed120c8334a57ea0cc13c0_RBAC_SirMixALot.png" />
+    </div>
   </div>
       `,
       code: `
@@ -589,6 +629,9 @@ test "custom roles grant the permissions they are assigned" {
     <li>In the test block, the group <code>anvil-readers</code> has the reader role on the <code>anvil</code> repository</li>
   </ul>
   <p>Take a look at the test to understand how relationship inheritance works, and run it to validate that the policy works correctly!</p>
+  <div class="mt-4 w-full text-center">
+    <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65aa92c45442d6570a3837e8_Group%20163%20(1).png" />
+  </div>
 </div>
     `,
     code: `
@@ -925,6 +968,9 @@ test "manager can have viewer role on employees repos" {
     <li>The test verifies that any user can read a public repository</li>
   </ul>
   <p>Take a look at the test to understand how public repositories work, and run it to validate that the policy works correctly!</p>
+  <div class="mt-4 w-full text-center">
+    <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6537e31163c7ec0b082fdcae_Knitting%20Bear.png" />
+  </div>
 </div>
     `,
     code: `
@@ -1214,6 +1260,9 @@ test "members can create repositories if they have quota" {
     </ul>
     <p>Remember that building robust authorization is an iterative process. Start simple and add complexity as your needs evolve.</p>
     <p>Thank you for taking the tour!</p>
+    <div class="mt-4 w-full text-center">
+      <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65305580ea8b0ee5c729a6c9_IMG_3268%201.png" />
+    </div>
   </div>
     `,
     code: `

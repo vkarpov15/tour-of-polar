@@ -146,6 +146,10 @@ function updatePageDisplay() {
   // Disable prev button if first page of Basics chapter
   const prevButton = document.getElementById('prevButton');
   prevButton.disabled = currentChapter === 'Basics' && currentPage === 0;
+
+  results.classList.remove('border-2');
+  results.classList.remove('border-green-500');
+  results.classList.remove('border-red-500');
 }
 
 async function runCode() {
@@ -163,16 +167,32 @@ async function runCode() {
       body: JSON.stringify({ code })
     });
     const result = await response.json();
-    let displayResult = 'Policy executed successfully';
+    let displayResult = '';
     if (result.error) {
       try {
         const data = JSON.parse(result.error.slice(result.error.indexOf('['), result.error.lastIndexOf(']') + 1));
-        displayResult = data.map(err => err.error_type + ': ' + err.message).join('\n\n');
+        displayResult += data.map(err => err.error_type + ': ' + err.message).join('\n');
       } catch(err) {
-        displayResult = result.error;
+        displayResult += result.error;
       }
+      results.classList.add('border-2');
+      results.classList.remove('border-green-500');
+      results.classList.add('border-red-500');
+    } else {
+      displayResult += `
+        <div class="flex flex-col items-center">
+          <div>Policy executed successfully</div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-500 mt-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      `;
+      results.classList.add('border-2');
+      results.classList.remove('border-red-500');
+      results.classList.add('border-green-500');
     }
-    results.textContent = displayResult;
+    displayResult += '</div>';
+    results.innerHTML = displayResult;
   } catch (error) {
     results.textContent = 'Error: ' + error.message;
   } finally {

@@ -85,67 +85,6 @@ test "Owners can view and edit items" {
 
 
   {
-    title: 'Multitenant Roles',
-    description: 'Learn how to use roles to simplify your authorization logic',
-    chapter: 'Role-Based Access Control (RBAC)',
-    text: `
-<h1 class="text-xl mt-4 mb-2">Role-Based Access Control: Multitenant Roles</h1>
-<div class="flex flex-col gap-2">
-  <p>Almost every application will have some form of role-based access control (RBAC). RBAC is so ubiquitous that Oso Cloud provides concise syntax for modeling it.</p>
-  <p>The simplest RBAC model to begin with is organization-level roles, in which users are assigned roles on the organization that they belong to.</p>
-  <p>The basic logic of RBAC is: "a user has a permission if they are granted a role and the role grants that permission".</p>
-  <p>The code on the right demonstrates organization-level roles where:</p>
-  <ul class="list-disc ml-6">
-    <li>Users are assigned roles on organizations they belong to</li>
-    <li>Admin role inherits all member permissions</li>
-    <li>Different permissions are granted to different roles</li>
-    <li>Tests verify role-based access controls work correctly</li>
-  </ul>
-  <p>Take a look at the test to understand how organization-level roles work - it shows that members can read organizations and repositories but cannot delete repositories or access other organizations. Run the test to validate that the policy works correctly!</p>
-</div>
-    `,
-    code: `
-actor User { }
-
-resource Organization {
-  roles = ["admin", "member"];
-  permissions = [
-    "read", "add_member", "repository.create",
-    "repository.read", "repository.delete"
-  ];
-
-  # role hierarchy:
-  # admins inherit all member permissions
-  "member" if "admin";
-
-  # org-level permissions
-  "read" if "member";
-  "add_member" if "admin";
-  # permission to create a repository
-  # in the organization
-  "repository.create" if "admin";
-
-  # permissions on child resources
-  "repository.read" if "member";
-  "repository.delete" if "admin";
-}
-
-test "org members can read organizations, and read repositories for organizations" {
-  setup {
-    has_role(User{"alice"}, "member", Organization{"acme"});
-  }
-
-  assert allow(User{"alice"}, "read", Organization{"acme"});
-  assert allow(User{"alice"}, "repository.read", Organization{"acme"});
-
-  assert_not allow(User{"alice"}, "repository.delete", Organization{"acme"});
-  assert_not allow(User{"alice"}, "read", Organization{"foobar"});
-}
-    `
-  },
-
-
-  {
       title: 'Resource-Specific Roles',
       description: 'Learn how to implement fine-grained access control with resource-specific roles',
       chapter: 'Role-Based Access Control (RBAC)',
@@ -362,57 +301,6 @@ test "long-form role inheritance" {
 
 
   {
-    title: 'Resource Sharing',
-    description: 'Learn how to share resources and control access at a granular level',
-    chapter: 'Role-Based Access Control (RBAC)',
-    text: `
-<h1 class="text-xl mt-4 mb-2">Role-Based Access Control: Resource Sharing</h1>
-<div class="flex flex-col gap-2">
-  <p>A common need in authorization systems is to be able to grant access to specific resources to specific people. This is often called resource sharing.</p>
-  <p>For example, you might want to:</p>
-  <ul class="list-disc ml-6">
-    <li>Share a document with a colleague</li>
-    <li>Invite someone to a private repository</li>
-    <li>Grant access to a specific file</li>
-  </ul>
-  <p>
-    Your application would use Oso to check whether a user has the "invite" permission, and, if, so, allow that user to send an invitation.
-    When an invitation is accepted, the recipient is typically granted the "reader" role on that repository.
-  </p>
-  <p>The code on the right demonstrates:</p>
-  <ul class="list-disc ml-6">
-    <li>How to define roles that control resource access</li>
-    <li>Using permissions to control who can share resources</li>
-    <li>Testing that sharing permissions work correctly</li>
-  </ul>
-  <p>Take a look at the test to understand how resource sharing works, and run it to validate that the policy works correctly!</p>
-</div>
-    `,
-    code: `
-actor User { }
-
-resource Repository {
-  roles = ["reader", "admin"];
-  permissions = ["read", "invite"];
-
-  "read" if "reader";
-  "invite" if "admin";
-}
-
-test "admin can invite readers" {
-  setup {
-    has_role(User{"alice"}, "admin", Repository{"anvil"});
-    has_role(User{"bob"}, "reader", Repository{"anvil"});
-  }
-
-  assert allow(User{"alice"}, "invite", Repository{"anvil"});
-  assert allow(User{"bob"}, "read", Repository{"anvil"});
-}
-    `
-  },
-
-
-  {
     title: 'Resource Ownership',
     description: 'Learn how to grant additional permissions to resource owners',
     chapter: 'Role-Based Access Control (RBAC)',
@@ -479,6 +367,118 @@ test "repository maintainers can close issues" {
   assert_not allow(User{"bob"}, "update", Issue{"537"});
   assert allow(User{"bob"}, "close", Issue{"42"});
 }`
+  },
+
+
+  {
+    title: 'Resource Sharing',
+    description: 'Learn how to share resources and control access at a granular level',
+    chapter: 'Role-Based Access Control (RBAC)',
+    text: `
+<h1 class="text-xl mt-4 mb-2">Role-Based Access Control: Resource Sharing</h1>
+<div class="flex flex-col gap-2">
+  <p>A common need in authorization systems is to be able to grant access to specific resources to specific people. This is often called resource sharing.</p>
+  <p>For example, you might want to:</p>
+  <ul class="list-disc ml-6">
+    <li>Share a document with a colleague</li>
+    <li>Invite someone to a private repository</li>
+    <li>Grant access to a specific file</li>
+  </ul>
+  <p>
+    Your application would use Oso to check whether a user has the "invite" permission, and, if, so, allow that user to send an invitation.
+    When an invitation is accepted, the recipient is typically granted the "reader" role on that repository.
+  </p>
+  <p>The code on the right demonstrates:</p>
+  <ul class="list-disc ml-6">
+    <li>How to define roles that control resource access</li>
+    <li>Using permissions to control who can share resources</li>
+    <li>Testing that sharing permissions work correctly</li>
+  </ul>
+  <p>Take a look at the test to understand how resource sharing works, and run it to validate that the policy works correctly!</p>
+</div>
+    `,
+    code: `
+actor User { }
+
+resource Repository {
+  roles = ["reader", "admin"];
+  permissions = ["read", "invite"];
+
+  "read" if "reader";
+  "invite" if "admin";
+}
+
+test "admin can invite readers" {
+  setup {
+    has_role(User{"alice"}, "admin", Repository{"anvil"});
+    has_role(User{"bob"}, "reader", Repository{"anvil"});
+  }
+
+  assert allow(User{"alice"}, "invite", Repository{"anvil"});
+  assert allow(User{"bob"}, "read", Repository{"anvil"});
+}
+    `
+  },
+
+
+  {
+    title: 'Multitenant Roles',
+    description: 'Learn how to use roles to simplify your authorization logic',
+    chapter: 'Role-Based Access Control (RBAC)',
+    text: `
+<h1 class="text-xl mt-4 mb-2">Role-Based Access Control: Multitenant Roles</h1>
+<div class="flex flex-col gap-2">
+  <p>Almost every application will have some form of role-based access control (RBAC). RBAC is so ubiquitous that Oso Cloud provides concise syntax for modeling it.</p>
+  <p>The simplest RBAC model to begin with is organization-level roles, in which users are assigned roles on the organization that they belong to.</p>
+  <p>The basic logic of RBAC is: "a user has a permission if they are granted a role and the role grants that permission".</p>
+  <p>The code on the right demonstrates organization-level roles where:</p>
+  <ul class="list-disc ml-6">
+    <li>Users are assigned roles on organizations they belong to</li>
+    <li>Admin role inherits all member permissions</li>
+    <li>Different permissions are granted to different roles</li>
+    <li>Tests verify role-based access controls work correctly</li>
+  </ul>
+  <p>Take a look at the test to understand how organization-level roles work - it shows that members can read organizations and repositories but cannot delete repositories or access other organizations. Run the test to validate that the policy works correctly!</p>
+</div>
+    `,
+    code: `
+actor User { }
+
+resource Organization {
+  roles = ["admin", "member"];
+  permissions = [
+    "read", "add_member", "repository.create",
+    "repository.read", "repository.delete"
+  ];
+
+  # role hierarchy:
+  # admins inherit all member permissions
+  "member" if "admin";
+
+  # org-level permissions
+  "read" if "member";
+  "add_member" if "admin";
+  # permission to create a repository
+  # in the organization
+  "repository.create" if "admin";
+
+  # permissions on child resources
+  "repository.read" if "member";
+  "repository.delete" if "admin";
+}
+
+test "org members can read organizations, and read repositories for organizations" {
+  setup {
+    has_role(User{"alice"}, "member", Organization{"acme"});
+  }
+
+  assert allow(User{"alice"}, "read", Organization{"acme"});
+  assert allow(User{"alice"}, "repository.read", Organization{"acme"});
+
+  assert_not allow(User{"alice"}, "repository.delete", Organization{"acme"});
+  assert_not allow(User{"alice"}, "read", Organization{"foobar"});
+}
+    `
   },
 
 
@@ -634,70 +634,6 @@ test "group members can read repositories" {
 
 
   {
-    title: 'Files & Folders',
-    description: 'Learn how to implement hierarchical file/folder permissions',
-    chapter: 'Relationship-Based Access Control (ReBAC)',
-    text: `
-<h1 class="text-xl mt-4 mb-2">Relationship-Based Access Control: Files & Folders</h1>
-<div class="flex flex-col gap-2">
-  <p>One common pattern in authorization is managing permissions for hierarchical file/folder structures, where access cascades down from parent to child resources.</p>
-  <p>The code on the right demonstrates:</p>
-  <ul class="list-disc ml-6">
-    <li>Defining relationships between repositories, folders, and files</li>
-    <li>Cascading permissions down folder hierarchies</li>
-    <li>Recursive role inheritance from parent to child folders</li>
-    <li>Testing permissions across nested resources</li>
-  </ul>
-  <p>Take a look at the test to understand how file/folder hierarchies work, and run it to validate that the policy works correctly!</p>
-</div>
-      `,
-      code: `
-actor User { }
-
-resource Repository {
-  roles = ["reader", "maintainer"];
-}
-
-resource Folder {
-  roles = ["reader", "writer"];
-  relations = {
-    repository: Repository,
-    folder: Folder,
-  };
-
-  "reader" if "reader" on "repository";
-  "writer" if "maintainer" on "repository";
-  role if role on "folder";
-}
-
-resource File {
-  permissions = ["read", "write"];
-  roles = ["reader", "writer"];
-  relations = {
-    folder: Folder,
-  };
-
-  role if role on "folder";
-
-  "read" if "reader";
-  "write" if "writer";
-}
-
-test "folder roles apply to files" {
-  setup {
-    has_role(User{"alice"}, "reader", Repository{"anvil"});
-    has_relation(Folder{"python"}, "repository", Repository{"anvil"});
-    has_relation(Folder{"tests"}, "folder", Folder{"python"});
-    has_relation(File{"test.py"}, "folder", Folder{"tests"});
-  }
-
-  assert allow(User{"alice"}, "read", File{"test.py"});
-}
-      `
-  },
-
-
-  {
     title: 'User-Resource Relationships',
     description: 'Learn how relationships between users and resources affect permissions',
     chapter: 'Relationship-Based Access Control (ReBAC)',
@@ -766,6 +702,70 @@ test "repository maintainers can close issues" {
   assert allow(User{"bob"}, "close", Issue{"42"});
 }
     `
+  },
+
+
+  {
+    title: 'Files & Folders',
+    description: 'Learn how to implement hierarchical file/folder permissions',
+    chapter: 'Relationship-Based Access Control (ReBAC)',
+    text: `
+<h1 class="text-xl mt-4 mb-2">Relationship-Based Access Control: Files & Folders</h1>
+<div class="flex flex-col gap-2">
+  <p>One common pattern in authorization is managing permissions for hierarchical file/folder structures, where access cascades down from parent to child resources.</p>
+  <p>The code on the right demonstrates:</p>
+  <ul class="list-disc ml-6">
+    <li>Defining relationships between repositories, folders, and files</li>
+    <li>Cascading permissions down folder hierarchies</li>
+    <li>Recursive role inheritance from parent to child folders</li>
+    <li>Testing permissions across nested resources</li>
+  </ul>
+  <p>Take a look at the test to understand how file/folder hierarchies work, and run it to validate that the policy works correctly!</p>
+</div>
+      `,
+      code: `
+actor User { }
+
+resource Repository {
+  roles = ["reader", "maintainer"];
+}
+
+resource Folder {
+  roles = ["reader", "writer"];
+  relations = {
+    repository: Repository,
+    folder: Folder,
+  };
+
+  "reader" if "reader" on "repository";
+  "writer" if "maintainer" on "repository";
+  role if role on "folder";
+}
+
+resource File {
+  permissions = ["read", "write"];
+  roles = ["reader", "writer"];
+  relations = {
+    folder: Folder,
+  };
+
+  role if role on "folder";
+
+  "read" if "reader";
+  "write" if "writer";
+}
+
+test "folder roles apply to files" {
+  setup {
+    has_role(User{"alice"}, "reader", Repository{"anvil"});
+    has_relation(Folder{"python"}, "repository", Repository{"anvil"});
+    has_relation(Folder{"tests"}, "folder", Folder{"python"});
+    has_relation(File{"test.py"}, "folder", Folder{"tests"});
+  }
+
+  assert allow(User{"alice"}, "read", File{"test.py"});
+}
+      `
   },
 
 

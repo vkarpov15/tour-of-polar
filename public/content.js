@@ -1265,6 +1265,14 @@ const chapterSlugs = {
   'Wrapping Up': 'wrapping-up'
 };
 
+const chapterImages = {
+  'Basics': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/657b69aa1d2f9b415a0207ce_Oso_Webflow.png',
+  'Role-Based Access Control (RBAC)': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/64ed120c8334a57ea0cc13c0_RBAC_SirMixALot.png',
+  'Relationship-Based Access Control (ReBAC)': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65aa92c45442d6570a3837e8_Group%20163%20(1).png',
+  'Attribute-Based Access Control (ABAC)': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6537e31163c7ec0b082fdcae_Knitting%20Bear.png',
+  'Wrapping Up': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65305580ea8b0ee5c729a6c9_IMG_3268%201.png'
+};
+
 const slugToChapter = Object.fromEntries(
   Object.entries(chapterSlugs).map(([chapter, slug]) => [slug, chapter])
 );

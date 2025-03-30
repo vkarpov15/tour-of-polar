@@ -1,7 +1,7 @@
 const content = [
   {
     text: `
-<h1 class="text-xl mt-4 mb-2">Hello, World</h1>
+<h1 class="text-xl mt-4 mb-2">Getting Started</h1>
 <div class="flex flex-col gap-2">
   <p>Welcome to a tour of the <a class="text-indigo-500" href="https://www.osohq.com/docs/oss/reference/polar.html">Polar authorization language.</a></p>
   <p>The tour is divided into a list of modules that you can access by clicking on <a class="text-indigo-500">A Tour of Polar</a> on the top left of the page.</p>
@@ -16,13 +16,16 @@ const content = [
   <p>The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
   <p>Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a bare bones policy which only defines object.</p>
   <p>Click "Run" to execute the Polar policy. You should see "Policy executed successfully" in the results panel once the policy has been run.</p>
+  <div class="mt-4 w-full text-center">
+    <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/632c9e3523e8603d4a04a884_Policy%20Editor.png" />
+  </div>
 </div>
     `,
     code: `
 actor User {}
 resource Organization {}
     `,
-    title: 'Hello, World',
+    title: 'Getting Started',
     description: 'Learn how to use this tour',
     chapter: 'Basics'
   },

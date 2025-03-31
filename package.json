@@ -1,4 +1,6 @@
 {
+  "name": "tour-of-polar",
+  "version": "0.1.0",
   "dependencies": {
     "@osohq/dev-server": "*",
     "next": "^15.1.3",

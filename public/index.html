@@ -107,6 +107,8 @@ function previousPage() {
     return;
   }
   updatePage(true);
+
+  track('PREVIOUS_PAGE', { currentChapter, currentPage });
 }
 
 function nextPage() {
@@ -119,6 +121,8 @@ function nextPage() {
     return;
   }
   updatePage(true);
+
+  track('NEXT_PAGE', { currentChapter, currentPage });
 }
 
 function updatePage(pushState) {
@@ -157,6 +161,8 @@ async function runCode() {
   runButton.disabled = true;
   const code = cm.getValue();
   const results = document.getElementById('results');
+  let success = null;
+  let error = null;
   try {
     results.innerHTML = '<div class="animate-spin h-5 w-5 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>';
     const response = await fetch('/api/exec', {
@@ -178,6 +184,8 @@ async function runCode() {
       results.classList.add('border-2');
       results.classList.remove('border-green-500');
       results.classList.add('border-red-500');
+      success = false;
+      error = result.error;
     } else {
       displayResult += `
         <div class="flex flex-col items-center">
@@ -190,6 +198,7 @@ async function runCode() {
       results.classList.add('border-2');
       results.classList.remove('border-red-500');
       results.classList.add('border-green-500');
+      success = true;
     }
     displayResult += '</div>';
     results.innerHTML = displayResult;
@@ -198,6 +207,13 @@ async function runCode() {
   } finally {
     runButton.disabled = false;
   }
+
+  track('RUN_CODE', {
+    currentChapter,
+    currentPage,
+    result,
+    error
+  });
 }
 
 // Get chapter and page from URL
@@ -222,6 +238,8 @@ updatePageDisplay();
 // Set initial URL
 const initialChapterSlug = chapterSlugs[currentChapter];
 history.replaceState(null, '', `/${initialChapterSlug}/${currentPage + 1}`);
+
+track('PAGE_LOAD', { currentChapter, currentPage });
 
 const cm = CodeMirror(document.getElementById("editor"), {
   value: initialPage.code.trim(),
@@ -352,6 +370,27 @@ function toggleDarkMode() {
   document.documentElement.classList.toggle('dark');
   localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
   cm.setOption('theme', document.documentElement.classList.contains('dark') ? 'monokai' : 'default');
+  track('TOGGLE_DARK_MODE', { darkMode: document.documentElement.classList.contains('dark') });
+}
+
+function track(type, data = {}) {
+  const sessionId = sessionStorage.getItem('sessionId') ||
+    Math.random().toString(36).slice(2) + Date.now().toString(36);
+  sessionStorage.setItem('sessionId', sessionId);
+
+  return fetch('/api/track', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      sessionId,
+      type,
+      data
+    })
+  }).catch(err => {
+    // Avoid any tracking errors for now to avoid interfering with the main functionality
+  });
 }
 </script>
 

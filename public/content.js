@@ -1,7 +1,7 @@
 const content = [
   {
     text: `
-<h1 class="text-xl mt-4 mb-2">Hello, World</h1>
+<h1 class="text-xl mt-4 mb-2">Getting Started</h1>
 <div class="flex flex-col gap-2">
   <p>Welcome to a tour of the <a class="text-indigo-500" href="https://www.osohq.com/docs/oss/reference/polar.html">Polar authorization language.</a></p>
   <p>The tour is divided into a list of modules that you can access by clicking on <a class="text-indigo-500">A Tour of Polar</a> on the top left of the page.</p>
@@ -16,13 +16,16 @@ const content = [
   <p>The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
   <p>Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a bare bones policy which only defines object.</p>
   <p>Click "Run" to execute the Polar policy. You should see "Policy executed successfully" in the results panel once the policy has been run.</p>
+  <div class="mt-4 w-full text-center">
+    <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/632c9e3523e8603d4a04a884_Policy%20Editor.png" />
+  </div>
 </div>
     `,
     code: `
 actor User {}
 resource Organization {}
     `,
-    title: 'Hello, World',
+    title: 'Getting Started',
     description: 'Learn how to use this tour',
     chapter: 'Basics'
   },
@@ -32,42 +35,28 @@ resource Organization {}
     text: `
 <h1 class="text-xl mt-4 mb-2">Basic Rules</h1>
 <div class="flex flex-col gap-2">
-  <p>Let's start with the basics of Polar rules and permissions.</p>
-  <p>On the right you'll see an example of a simple policy that gives members viewing permissions on organizations.</p>
-  <p>The policy code is divided into two main parts:</p>
-  <ul class="list-disc ml-6">
-    <li>The rules section at the top (including actor/resource definitions and permission rules) define what actions are allowed</li>
-    <li>The test section at the bottom verifies that the policy works as expected by asserting specific permissions</li>
-  </ul>
-  <p>Try running the code! You should see an assertion error because the test expects Alice to have view permission, but we haven't granted her the required member role yet.</p>
-  <p>You can fix the assertion error by adding <pre>has_role(User{"alice"}, "member", Organization{"acme"});</pre> anywhere in the policy code.</p>
+<p>Now that you've seen how to define resources in Polar, let's learn how roles and permissions work together in a Polar policy.</p>
+<p>
+  The code on the right demonstrates a common pattern - an Item resource that has:
+</p>
+<ul class="list-disc ml-6">
+  <li>Defined roles (viewer, owner)</li>
+  <li>Defined permissions (view, edit)</li>
+  <li>Rules mapping roles to permissions</li>
+</ul>
+<p>This introduces two key concepts - using roles to group related permissions, and defining rules to determine when permissions are granted.</p>
+<p>Try running the code! You should see that the policy executed successfully.</p>
 </div>
     `,
     code: `
-################
-# Rules section:
-################
 actor User {}
-resource Organization {
-roles = ["admin", "member"];
-  permissions = ["view"];
+resource Item {
+  roles = ["viewer", "owner"];
+  permissions = ["view", "edit"];
 
-  # Admins inherit all permissions from members
-  "member" if "admin";
-
-  # Members can view organizations
-  "view" if "member";
-}
-
-
-has_role(user: User, "member", organization: Organization) if
-  has_role(user, "admin", organization);
-
-###############
-# Test section:
-###############
-test "Alice can view Acme" {
-  assert has_permission(User{"alice"}, "view", Organization{"acme"});
+  "view" if "viewer";
+  "edit" if "owner";
+  "viewer" if "owner";
 }
     `,
     title: 'Basic Rules',
@@ -77,63 +66,61 @@ test "Alice can view Acme" {
 
 
   {
-    title: 'Multitenant Roles',
-    description: 'Learn how to use roles to simplify your authorization logic',
-    chapter: 'Role-Based Access Control (RBAC)',
     text: `
-<h1 class="text-xl mt-4 mb-2">Role-Based Access Control: Multitenant Roles</h1>
+<h1 class="text-xl mt-4 mb-2">Introducing Testing</h1>
 <div class="flex flex-col gap-2">
-  <p>Almost every application will have some form of role-based access control (RBAC). RBAC is so ubiquitous that Oso Cloud provides concise syntax for modeling it.</p>
-  <p>The simplest RBAC model to begin with is organization-level roles, in which users are assigned roles on the organization that they belong to.</p>
-  <p>The basic logic of RBAC is: "a user has a permission if they are granted a role and the role grants that permission".</p>
-  <p>The code on the right demonstrates organization-level roles where:</p>
-  <ul class="list-disc ml-6">
-    <li>Users are assigned roles on organizations they belong to</li>
-    <li>Admin role inherits all member permissions</li>
-    <li>Different permissions are granted to different roles</li>
-    <li>Tests verify role-based access controls work correctly</li>
-  </ul>
-  <p>Take a look at the test to understand how organization-level roles work - it shows that members can read organizations and repositories but cannot delete repositories or access other organizations. Run the test to validate that the policy works correctly!</p>
+  <p>Next, let's take a look at how to write policy tests in Polar. Tests let you check that your policies do what you expect.</p>
+  <p>On the right you'll see an example of a simple policy that gives members viewing permissions on organizations.</p>
+  <p>The policy code is divided into two main parts:</p>
+  <ol class="list-disc ml-6">
+    <li>The rules section at the top (including actor/resource definitions and permission rules) define what actions are allowed</li>
+    <li>The test section at the bottom verifies that the policy works as expected given some data defined in <code>setup {}</code></li>
+  </ol>
+  <p>
+    Try running the code! So far, policies in this tour executed without any errors. This policy includes an intentional error to demonstrate what happens when tests fail. The test expects Alice to have view permission, but we haven't granted her the required member role yet.
+  </p>
+  <p>You can fix the assertion error by uncommenting line 29:</p>
+  <pre class="inline">has_role(User{"alice"}, "owner", Item{"foo"});</pre>
 </div>
     `,
     code: `
-actor User { }
+################
+# Rules section:
+################
+actor User {}
+resource Item {
+  roles = ["viewer", "owner"];
+  permissions = ["view", "edit"];
 
-resource Organization {
-  roles = ["admin", "member"];
-  permissions = [
-    "read", "add_member", "repository.create",
-    "repository.read", "repository.delete"
-  ];
-
-  # role hierarchy:
-  # admins inherit all member permissions
-  "member" if "admin";
-
-  # org-level permissions
-  "read" if "member";
-  "add_member" if "admin";
-  # permission to create a repository
-  # in the organization
-  "repository.create" if "admin";
-
-  # permissions on child resources
-  "repository.read" if "member";
-  "repository.delete" if "admin";
+  "view" if "viewer";
+  "edit" if "owner";
+  "viewer" if "owner";
 }
 
-test "org members can read organizations, and read repositories for organizations" {
+###############
+# Test section:
+###############
+test "Viewers can view items" {
   setup {
-    has_role(User{"alice"}, "member", Organization{"acme"});
+    # This code defines a _fact_ in Oso. Facts are a flexible data model for representing authorization data.
+    # The following fact says that "alice" has the role "viewer" on the item "foo".
+    has_role(User{"alice"}, "viewer", Item{"foo"});
   }
-
-  assert allow(User{"alice"}, "read", Organization{"acme"});
-  assert allow(User{"alice"}, "repository.read", Organization{"acme"});
-
-  assert_not allow(User{"alice"}, "repository.delete", Organization{"acme"});
-  assert_not allow(User{"alice"}, "read", Organization{"foobar"});
+  assert has_permission(User{"alice"}, "view", Item{"foo"});
+  assert_not has_permission(User{"alice"}, "edit", Item{"foo"});
 }
-    `
+
+test "Owners can view and edit items" {
+  setup {
+    # has_role(User{"alice"}, "owner", Item{"foo"});
+  }
+  assert has_permission(User{"alice"}, "view", Item{"foo"});
+  assert has_permission(User{"alice"}, "edit", Item{"foo"});
+}
+    `,
+    title: 'Introducing Testing',
+    description: 'Learn how to write test cases in Polar',
+    chapter: 'Basics'
   },
 
 
@@ -156,6 +143,9 @@ test "org members can read organizations, and read repositories for organization
       <li>Testing that permissions work correctly across resources</li>
     </ul>
     <p>Take a look at the tests to understand how resource-specific roles enable fine-grained access control, and run them to validate that the policy works correctly!</p>
+    <div class="mt-4 w-full text-center">
+      <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/64ed120c8334a57ea0cc13c0_RBAC_SirMixALot.png" />
+    </div>
   </div>
       `,
       code: `
@@ -354,57 +344,6 @@ test "long-form role inheritance" {
 
 
   {
-    title: 'Resource Sharing',
-    description: 'Learn how to share resources and control access at a granular level',
-    chapter: 'Role-Based Access Control (RBAC)',
-    text: `
-<h1 class="text-xl mt-4 mb-2">Role-Based Access Control: Resource Sharing</h1>
-<div class="flex flex-col gap-2">
-  <p>A common need in authorization systems is to be able to grant access to specific resources to specific people. This is often called resource sharing.</p>
-  <p>For example, you might want to:</p>
-  <ul class="list-disc ml-6">
-    <li>Share a document with a colleague</li>
-    <li>Invite someone to a private repository</li>
-    <li>Grant access to a specific file</li>
-  </ul>
-  <p>
-    Your application would use Oso to check whether a user has the "invite" permission, and, if, so, allow that user to send an invitation.
-    When an invitation is accepted, the recipient is typically granted the "reader" role on that repository.
-  </p>
-  <p>The code on the right demonstrates:</p>
-  <ul class="list-disc ml-6">
-    <li>How to define roles that control resource access</li>
-    <li>Using permissions to control who can share resources</li>
-    <li>Testing that sharing permissions work correctly</li>
-  </ul>
-  <p>Take a look at the test to understand how resource sharing works, and run it to validate that the policy works correctly!</p>
-</div>
-    `,
-    code: `
-actor User { }
-
-resource Repository {
-  roles = ["reader", "admin"];
-  permissions = ["read", "invite"];
-
-  "read" if "reader";
-  "invite" if "admin";
-}
-
-test "admin can invite readers" {
-  setup {
-    has_role(User{"alice"}, "admin", Repository{"anvil"});
-    has_role(User{"bob"}, "reader", Repository{"anvil"});
-  }
-
-  assert allow(User{"alice"}, "invite", Repository{"anvil"});
-  assert allow(User{"bob"}, "read", Repository{"anvil"});
-}
-    `
-  },
-
-
-  {
     title: 'Resource Ownership',
     description: 'Learn how to grant additional permissions to resource owners',
     chapter: 'Role-Based Access Control (RBAC)',
@@ -471,6 +410,118 @@ test "repository maintainers can close issues" {
   assert_not allow(User{"bob"}, "update", Issue{"537"});
   assert allow(User{"bob"}, "close", Issue{"42"});
 }`
+  },
+
+
+  {
+    title: 'Resource Sharing',
+    description: 'Learn how to share resources and control access at a granular level',
+    chapter: 'Role-Based Access Control (RBAC)',
+    text: `
+<h1 class="text-xl mt-4 mb-2">Role-Based Access Control: Resource Sharing</h1>
+<div class="flex flex-col gap-2">
+  <p>A common need in authorization systems is to be able to grant access to specific resources to specific people. This is often called resource sharing.</p>
+  <p>For example, you might want to:</p>
+  <ul class="list-disc ml-6">
+    <li>Share a document with a colleague</li>
+    <li>Invite someone to a private repository</li>
+    <li>Grant access to a specific file</li>
+  </ul>
+  <p>
+    Your application would use Oso to check whether a user has the "invite" permission, and, if, so, allow that user to send an invitation.
+    When an invitation is accepted, the recipient is typically granted the "reader" role on that repository.
+  </p>
+  <p>The code on the right demonstrates:</p>
+  <ul class="list-disc ml-6">
+    <li>How to define roles that control resource access</li>
+    <li>Using permissions to control who can share resources</li>
+    <li>Testing that sharing permissions work correctly</li>
+  </ul>
+  <p>Take a look at the test to understand how resource sharing works, and run it to validate that the policy works correctly!</p>
+</div>
+    `,
+    code: `
+actor User { }
+
+resource Repository {
+  roles = ["reader", "admin"];
+  permissions = ["read", "invite"];
+
+  "read" if "reader";
+  "invite" if "admin";
+}
+
+test "admin can invite readers" {
+  setup {
+    has_role(User{"alice"}, "admin", Repository{"anvil"});
+    has_role(User{"bob"}, "reader", Repository{"anvil"});
+  }
+
+  assert allow(User{"alice"}, "invite", Repository{"anvil"});
+  assert allow(User{"bob"}, "read", Repository{"anvil"});
+}
+    `
+  },
+
+
+  {
+    title: 'Multitenant Roles',
+    description: 'Learn how to use roles to simplify your authorization logic',
+    chapter: 'Role-Based Access Control (RBAC)',
+    text: `
+<h1 class="text-xl mt-4 mb-2">Role-Based Access Control: Multitenant Roles</h1>
+<div class="flex flex-col gap-2">
+  <p>Almost every application will have some form of role-based access control (RBAC). RBAC is so ubiquitous that Oso Cloud provides concise syntax for modeling it.</p>
+  <p>The simplest RBAC model to begin with is organization-level roles, in which users are assigned roles on the organization that they belong to.</p>
+  <p>The basic logic of RBAC is: "a user has a permission if they are granted a role and the role grants that permission".</p>
+  <p>The code on the right demonstrates organization-level roles where:</p>
+  <ul class="list-disc ml-6">
+    <li>Users are assigned roles on organizations they belong to</li>
+    <li>Admin role inherits all member permissions</li>
+    <li>Different permissions are granted to different roles</li>
+    <li>Tests verify role-based access controls work correctly</li>
+  </ul>
+  <p>Take a look at the test to understand how organization-level roles work - it shows that members can read organizations and repositories but cannot delete repositories or access other organizations. Run the test to validate that the policy works correctly!</p>
+</div>
+    `,
+    code: `
+actor User { }
+
+resource Organization {
+  roles = ["admin", "member"];
+  permissions = [
+    "read", "add_member", "repository.create",
+    "repository.read", "repository.delete"
+  ];
+
+  # role hierarchy:
+  # admins inherit all member permissions
+  "member" if "admin";
+
+  # org-level permissions
+  "read" if "member";
+  "add_member" if "admin";
+  # permission to create a repository
+  # in the organization
+  "repository.create" if "admin";
+
+  # permissions on child resources
+  "repository.read" if "member";
+  "repository.delete" if "admin";
+}
+
+test "org members can read organizations, and read repositories for organizations" {
+  setup {
+    has_role(User{"alice"}, "member", Organization{"acme"});
+  }
+
+  assert allow(User{"alice"}, "read", Organization{"acme"});
+  assert allow(User{"alice"}, "repository.read", Organization{"acme"});
+
+  assert_not allow(User{"alice"}, "repository.delete", Organization{"acme"});
+  assert_not allow(User{"alice"}, "read", Organization{"foobar"});
+}
+    `
   },
 
 
@@ -578,6 +629,9 @@ test "custom roles grant the permissions they are assigned" {
     <li>In the test block, the group <code>anvil-readers</code> has the reader role on the <code>anvil</code> repository</li>
   </ul>
   <p>Take a look at the test to understand how relationship inheritance works, and run it to validate that the policy works correctly!</p>
+  <div class="mt-4 w-full text-center">
+    <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65aa92c45442d6570a3837e8_Group%20163%20(1).png" />
+  </div>
 </div>
     `,
     code: `
@@ -622,70 +676,6 @@ test "group members can read repositories" {
   assert allow(User{"charlie"}, "read", Repository{"anvil"});
 }
     `
-  },
-
-
-  {
-    title: 'Files & Folders',
-    description: 'Learn how to implement hierarchical file/folder permissions',
-    chapter: 'Relationship-Based Access Control (ReBAC)',
-    text: `
-<h1 class="text-xl mt-4 mb-2">Relationship-Based Access Control: Files & Folders</h1>
-<div class="flex flex-col gap-2">
-  <p>One common pattern in authorization is managing permissions for hierarchical file/folder structures, where access cascades down from parent to child resources.</p>
-  <p>The code on the right demonstrates:</p>
-  <ul class="list-disc ml-6">
-    <li>Defining relationships between repositories, folders, and files</li>
-    <li>Cascading permissions down folder hierarchies</li>
-    <li>Recursive role inheritance from parent to child folders</li>
-    <li>Testing permissions across nested resources</li>
-  </ul>
-  <p>Take a look at the test to understand how file/folder hierarchies work, and run it to validate that the policy works correctly!</p>
-</div>
-      `,
-      code: `
-actor User { }
-
-resource Repository {
-  roles = ["reader", "maintainer"];
-}
-
-resource Folder {
-  roles = ["reader", "writer"];
-  relations = {
-    repository: Repository,
-    folder: Folder,
-  };
-
-  "reader" if "reader" on "repository";
-  "writer" if "maintainer" on "repository";
-  role if role on "folder";
-}
-
-resource File {
-  permissions = ["read", "write"];
-  roles = ["reader", "writer"];
-  relations = {
-    folder: Folder,
-  };
-
-  role if role on "folder";
-
-  "read" if "reader";
-  "write" if "writer";
-}
-
-test "folder roles apply to files" {
-  setup {
-    has_role(User{"alice"}, "reader", Repository{"anvil"});
-    has_relation(Folder{"python"}, "repository", Repository{"anvil"});
-    has_relation(Folder{"tests"}, "folder", Folder{"python"});
-    has_relation(File{"test.py"}, "folder", Folder{"tests"});
-  }
-
-  assert allow(User{"alice"}, "read", File{"test.py"});
-}
-      `
   },
 
 
@@ -758,6 +748,70 @@ test "repository maintainers can close issues" {
   assert allow(User{"bob"}, "close", Issue{"42"});
 }
     `
+  },
+
+
+  {
+    title: 'Files & Folders',
+    description: 'Learn how to implement hierarchical file/folder permissions',
+    chapter: 'Relationship-Based Access Control (ReBAC)',
+    text: `
+<h1 class="text-xl mt-4 mb-2">Relationship-Based Access Control: Files & Folders</h1>
+<div class="flex flex-col gap-2">
+  <p>One common pattern in authorization is managing permissions for hierarchical file/folder structures, where access cascades down from parent to child resources.</p>
+  <p>The code on the right demonstrates:</p>
+  <ul class="list-disc ml-6">
+    <li>Defining relationships between repositories, folders, and files</li>
+    <li>Cascading permissions down folder hierarchies</li>
+    <li>Recursive role inheritance from parent to child folders</li>
+    <li>Testing permissions across nested resources</li>
+  </ul>
+  <p>Take a look at the test to understand how file/folder hierarchies work, and run it to validate that the policy works correctly!</p>
+</div>
+      `,
+      code: `
+actor User { }
+
+resource Repository {
+  roles = ["reader", "maintainer"];
+}
+
+resource Folder {
+  roles = ["reader", "writer"];
+  relations = {
+    repository: Repository,
+    folder: Folder,
+  };
+
+  "reader" if "reader" on "repository";
+  "writer" if "maintainer" on "repository";
+  role if role on "folder";
+}
+
+resource File {
+  permissions = ["read", "write"];
+  roles = ["reader", "writer"];
+  relations = {
+    folder: Folder,
+  };
+
+  role if role on "folder";
+
+  "read" if "reader";
+  "write" if "writer";
+}
+
+test "folder roles apply to files" {
+  setup {
+    has_role(User{"alice"}, "reader", Repository{"anvil"});
+    has_relation(Folder{"python"}, "repository", Repository{"anvil"});
+    has_relation(Folder{"tests"}, "folder", Folder{"python"});
+    has_relation(File{"test.py"}, "folder", Folder{"tests"});
+  }
+
+  assert allow(User{"alice"}, "read", File{"test.py"});
+}
+      `
   },
 
 
@@ -914,6 +968,9 @@ test "manager can have viewer role on employees repos" {
     <li>The test verifies that any user can read a public repository</li>
   </ul>
   <p>Take a look at the test to understand how public repositories work, and run it to validate that the policy works correctly!</p>
+  <div class="mt-4 w-full text-center">
+    <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6537e31163c7ec0b082fdcae_Knitting%20Bear.png" />
+  </div>
 </div>
     `,
     code: `
@@ -1203,6 +1260,9 @@ test "members can create repositories if they have quota" {
     </ul>
     <p>Remember that building robust authorization is an iterative process. Start simple and add complexity as your needs evolve.</p>
     <p>Thank you for taking the tour!</p>
+    <div class="mt-4 w-full text-center">
+      <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65305580ea8b0ee5c729a6c9_IMG_3268%201.png" />
+    </div>
   </div>
     `,
     code: `
@@ -1255,6 +1315,14 @@ const chapterSlugs = {
   'Relationship-Based Access Control (ReBAC)': 'rebac',
   'Attribute-Based Access Control (ABAC)': 'abac',
   'Wrapping Up': 'wrapping-up'
+};
+
+const chapterImages = {
+  'Basics': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/657b69aa1d2f9b415a0207ce_Oso_Webflow.png',
+  'Role-Based Access Control (RBAC)': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/64ed120c8334a57ea0cc13c0_RBAC_SirMixALot.png',
+  'Relationship-Based Access Control (ReBAC)': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65aa92c45442d6570a3837e8_Group%20163%20(1).png',
+  'Attribute-Based Access Control (ABAC)': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6537e31163c7ec0b082fdcae_Knitting%20Bear.png',
+  'Wrapping Up': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65305580ea8b0ee5c729a6c9_IMG_3268%201.png'
 };
 
 const slugToChapter = Object.fromEntries(

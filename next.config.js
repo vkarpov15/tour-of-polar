@@ -14,7 +14,16 @@ module.exports = {
       {
         source: '/',
         destination: '/index.html',
-      },
+      }
     ];
   },
+  async redirects() {
+      return [
+        {
+          source: '/studio',
+          destination: '/studio/index.html',
+          permanent: true,
+        }
+      ];
+    },
 };

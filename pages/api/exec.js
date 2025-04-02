@@ -6,6 +6,14 @@ import {
 
 let oso = null;
 
+/**
+ * This endpoint initializes a local Oso dev server, points an Oso Cloud client to the
+ * local Oso dev server, and executes a policy string sent in the request body.
+ * It returns the policy execution result or handles any errors that occur during
+ * initialization or execution.
+ * The frontend uses this endpoint to run the policy the user entered in.
+ */
+
 export default async function exec(req, res) {
   try {
     const { code } = req.body;

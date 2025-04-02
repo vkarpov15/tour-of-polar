@@ -133,5 +133,6 @@ dist
 .netlify
 
 public/tw.css
+public/studio
 
 .oso

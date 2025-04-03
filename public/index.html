@@ -14,6 +14,7 @@
   <script src="https://unpkg.com/codemirror@5.65.16/lib/codemirror.js"></script>
   <script src="https://unpkg.com/codemirror@5.65.16/mode/ruby/ruby.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/theme/monokai.css">
+  <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/theme/idea.css">
   <script src="/content.js"></script>
 
   <style>
@@ -249,7 +250,7 @@ const cm = CodeMirror(document.getElementById("editor"), {
   tabSize: 2,
   autofocus: true,
   mode: "ruby",
-  theme: document.documentElement.classList.contains('dark') ? 'monokai' : 'default',
+  theme: document.documentElement.classList.contains('dark') ? 'monokai' : 'idea',
   extraKeys: {
     "Shift-Enter": function(cm) {
       runCode();
@@ -370,7 +371,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function toggleDarkMode() {
   document.documentElement.classList.toggle('dark');
   localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-  cm.setOption('theme', document.documentElement.classList.contains('dark') ? 'monokai' : 'default');
+  cm.setOption('theme', document.documentElement.classList.contains('dark') ? 'monokai' : 'idea');
   track('TOGGLE_DARK_MODE', { darkMode: document.documentElement.classList.contains('dark') });
 }
 

@@ -2,23 +2,23 @@ const content = [
   {
     text: `
 <h1 class="text-xl mt-4 mb-2">Getting Started</h1>
-<div class="flex flex-col gap-2">
+<div>
+  <div class="float-left mr-4">
+    <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="/images/bear1.png" />
+  </div>
   <p>Welcome to a tour of the <a class="text-indigo-500" href="https://www.osohq.com/docs/oss/reference/polar.html">Polar authorization language.</a></p>
-  <p>The tour is divided into a list of modules that you can access by clicking on <a class="text-indigo-500">A Tour of Polar</a> on the top left of the page.</p>
-  <p>You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
-  <p>Throughout the tour, you will find a series of slides and exercises to complete.</p>
-  <p>You can use the following keyboard shortcuts:</p>
-  <ul class="list-disc ml-6">
+  <p class="mt-2">The tour is divided into a list of modules that you can access by clicking on <a class="text-indigo-500">A Tour of Polar</a> on the top left of the page.</p>
+  <p class="mt-2">You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
+  <p class="mt-2">Throughout the tour, you will find a series of slides and exercises to complete.</p>
+  <p class="mt-2">You can use the following keyboard shortcuts:</p>
+  <ul class="list-disc list-inside mt-2">
     <li><code>Shift+Enter</code>: Run code</li>
     <li><code>Page Up</code>: Previous page</li>
     <li><code>Page Down</code>: Next page</li>
   </ul>
-  <p>The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
-  <p>Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a bare bones policy which only defines object.</p>
-  <p>Click "Run" to execute the Polar policy. You should see "Policy executed successfully" in the results panel once the policy has been run.</p>
-  <div class="mt-4 w-full text-center">
-    <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/632c9e3523e8603d4a04a884_Policy%20Editor.png" />
-  </div>
+  <p class="mt-2">The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
+  <p class="mt-2">Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a bare bones policy which only defines object.</p>
+  <p class="mt-2">Click "Run" to execute the Polar policy. You should see "Policy executed successfully" in the results panel once the policy has been run.</p>
 </div>
     `,
     code: `
@@ -39,7 +39,7 @@ resource Organization {}
 <p>
   The code on the right demonstrates a common pattern - an Item resource that has:
 </p>
-<ul class="list-disc ml-6">
+<ul class="list-disc list-inside">
   <li>Defined roles (viewer, owner)</li>
   <li>Defined permissions (view, edit)</li>
   <li>Rules mapping roles to permissions</li>
@@ -72,7 +72,7 @@ resource Item {
   <p>Next, let's take a look at how to write policy tests in Polar. Tests let you check that your policies do what you expect.</p>
   <p>On the right you'll see an example of a simple policy that gives members viewing permissions on organizations.</p>
   <p>The policy code is divided into two main parts:</p>
-  <ol class="list-disc ml-6">
+  <ol class="list-disc list-inside">
     <li>The rules section at the top (including actor/resource definitions and permission rules) define what actions are allowed</li>
     <li>The test section at the bottom verifies that the policy works as expected given some data defined in <code>setup {}</code></li>
   </ol>
@@ -130,22 +130,22 @@ test "Owners can view and edit items" {
       chapter: 'Role-Based Access Control (RBAC)',
       text: `
   <h1 class="text-xl mt-4 mb-2">Role-Based Access Control: Resource-Specific Roles</h1>
-  <div class="flex flex-col gap-2">
-    <p>Almost every application starts with roles at the organization level. But it's a very coarse model since it only allows you to grant access to all resources in an organization.</p>
-    <p>A natural way to provide more fine-grained access is to extend the concept of roles to other resources in the application.</p>
-    <p>We call this pattern resource-specific roles since we're granting users access to a specific resource by granting them a role directly on the resource.</p>
-    <p>When you start thinking in terms of resource-specific roles, it might become clear that organization-level roles are a specific case of resource-specific roles where the resource is the organization!</p>
-    <p>The code on the right demonstrates:</p>
-    <ul class="list-disc ml-6">
+  <div>
+    <div class="float-left mr-4">
+      <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="/images/rbac-bear.png" />
+    </div>
+    <p class="mt-2">Almost every application starts with roles at the organization level. But it's a very coarse model since it only allows you to grant access to all resources in an organization.</p>
+    <p class="mt-2">A natural way to provide more fine-grained access is to extend the concept of roles to other resources in the application.</p>
+    <p class="mt-2">We call this pattern resource-specific roles since we're granting users access to a specific resource by granting them a role directly on the resource.</p>
+    <p class="mt-2">When you start thinking in terms of resource-specific roles, it might become clear that organization-level roles are a specific case of resource-specific roles where the resource is the organization!</p>
+    <p class="mt-2">The code on the right demonstrates:</p>
+    <ul class="list-disc list-inside mt-2">
       <li>How to add granularity at the repository level</li>
       <li>Repository as its own resource with read/delete permissions</li>
       <li>Role inheritance from organizations</li>
       <li>Testing that permissions work correctly across resources</li>
     </ul>
-    <p>Take a look at the tests to understand how resource-specific roles enable fine-grained access control, and run them to validate that the policy works correctly!</p>
-    <div class="mt-4 w-full text-center">
-      <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/64ed120c8334a57ea0cc13c0_RBAC_SirMixALot.png" />
-    </div>
+    <p class="mt-2">Take a look at the tests to understand how resource-specific roles enable fine-grained access control, and run them to validate that the policy works correctly!</p>
   </div>
       `,
       code: `
@@ -219,13 +219,13 @@ test "repository admins can delete repositories, regardless of their organizatio
 <div class="flex flex-col gap-2">
   <p>Global roles are a powerful way to grant permissions that span your entire application, regardless of specific resources.</p>
   <p>This pattern is particularly useful for:</p>
-  <ul class="list-disc ml-6">
+  <ul class="list-disc list-inside">
     <li>Internal users who need broad access across the system</li>
     <li>Purely internal applications where granular resource control isn't needed</li>
     <li>Super-admin type roles that need universal access</li>
   </ul>
   <p>The code on the right demonstrates:</p>
-  <ul class="list-disc ml-6">
+  <ul class="list-disc list-inside">
     <li>How to declare global roles</li>
     <li>Inheritance between global and resource-specific roles</li>
     <li>Testing global role permissions</li>
@@ -279,7 +279,7 @@ test "global admins can read all organizations" {
   <p>One common pattern in role-based access control is inheriting roles between related resources, particularly in parent-child relationships.</p>
   <p>For example, files and folders have a natural hierarchy where access to a folder typically grants access to its contents.</p>
   <p>The code on the right demonstrates:</p>
-  <ul class="list-disc ml-6">
+  <ul class="list-disc list-inside">
     <li>Using relations to model resource hierarchies</li>
     <li>Inheriting roles from parent to child resources</li>
     <li>Two-way role inheritance between resources</li>
@@ -352,7 +352,7 @@ test "long-form role inheritance" {
 <div class="flex flex-col gap-2">
   <p>A common pattern in authorization is granting special permissions to the "owner" of a resource - for example, the creator of an issue or the author of a comment.</p>
   <p>In the code on the right:</p>
-  <ul class="list-disc ml-6">
+  <ul class="list-disc list-inside">
     <li>Issues have a creator relation that points to the User who created them</li>
     <li>Issue creators can update and close their own issues</li>
     <li>Repository maintainers can close but not update issues</li>
@@ -422,7 +422,7 @@ test "repository maintainers can close issues" {
 <div class="flex flex-col gap-2">
   <p>A common need in authorization systems is to be able to grant access to specific resources to specific people. This is often called resource sharing.</p>
   <p>For example, you might want to:</p>
-  <ul class="list-disc ml-6">
+  <ul class="list-disc list-inside">
     <li>Share a document with a colleague</li>
     <li>Invite someone to a private repository</li>
     <li>Grant access to a specific file</li>
@@ -432,7 +432,7 @@ test "repository maintainers can close issues" {
     When an invitation is accepted, the recipient is typically granted the "reader" role on that repository.
   </p>
   <p>The code on the right demonstrates:</p>
-  <ul class="list-disc ml-6">
+  <ul class="list-disc list-inside">
     <li>How to define roles that control resource access</li>
     <li>Using permissions to control who can share resources</li>
     <li>Testing that sharing permissions work correctly</li>
@@ -475,7 +475,7 @@ test "admin can invite readers" {
   <p>The simplest RBAC model to begin with is organization-level roles, in which users are assigned roles on the organization that they belong to.</p>
   <p>The basic logic of RBAC is: "a user has a permission if they are granted a role and the role grants that permission".</p>
   <p>The code on the right demonstrates organization-level roles where:</p>
-  <ul class="list-disc ml-6">
+  <ul class="list-disc list-inside">
     <li>Users are assigned roles on organizations they belong to</li>
     <li>Admin role inherits all member permissions</li>
     <li>Different permissions are granted to different roles</li>
@@ -535,7 +535,7 @@ test "org members can read organizations, and read repositories for organization
   <p>Some applications need more flexibility than predefined roles can provide. Different organizations may want their users to engage with features in diverse ways that can't be anticipated.</p>
   <p>Custom roles allow organizations to create roles on the fly with exactly the permissions they need.</p>
   <p>The code on the right demonstrates:</p>
-  <ul class="list-disc ml-6">
+  <ul class="list-disc list-inside">
     <li>Defining custom Role types</li>
     <li>Granting configurable permissions at the organization level</li>
     <li>Inheriting permissions on repositories</li>
@@ -620,18 +620,20 @@ test "custom roles grant the permissions they are assigned" {
     chapter: 'Relationship-Based Access Control (ReBAC)',
     text: `
 <h1 class="text-xl mt-4 mb-2">Relationship-Based Access Control: User Groups</h1>
-<div class="flex flex-col gap-2">
-  <p>Relationship-based access control (ReBAC) means organizing permissions based on relationships between resources. Let's look at a basic example involving groups and repositories.</p>
-  <p>In the code on the right:</p>
-  <ul class="list-disc ml-6">
+<div>
+  <div class="float-left mr-4">
+    <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="/images/rebac-bear.png" />
+  </div>
+  <p class="mt-2">Relationship-based access control (ReBAC) means organizing permissions based on relationships between resources. Let's look at a basic example involving groups and repositories.</p>
+  <p class="mt-2">So far, your policies have only had one type of actor: a user. This policy has two actors: users and groups.</p>
+  <p class="mt-2">There is a <code>has_group()</code> fact that determines whether a user belongs to a group. You can think of <code>has_group()</code> as a relationship between a user and a group.</p>
+  <p class="mt-2">In the code on the right:</p>
+  <ul class="list-disc list-inside mt-2">
     <li>Users can inherit roles from groups they belong to</li>
     <li>The Repository resource defines a reader role</li>
     <li>In the test block, the group <code>anvil-readers</code> has the reader role on the <code>anvil</code> repository</li>
   </ul>
-  <p>Take a look at the test to understand how relationship inheritance works, and run it to validate that the policy works correctly!</p>
-  <div class="mt-4 w-full text-center">
-    <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65aa92c45442d6570a3837e8_Group%20163%20(1).png" />
-  </div>
+  <p class="mt-2">Take a look at the test to understand how relationship inheritance works, and run it to validate that the policy works correctly!</p>
 </div>
     `,
     code: `
@@ -689,7 +691,7 @@ test "group members can read repositories" {
     <p>Many applications want to grant special permissions based on a relationship between a user and a resource, such as allowing a repository's creator to delete it.</p>
     <p>These relationships should be used when representing core concepts of your application, while roles are better for granting explicit access permissions.</p>
     <p>The code on the right demonstrates:</p>
-    <ul class="list-disc ml-6">
+    <ul class="list-disc list-inside">
       <li>Defining creator relationships on issues</li>
       <li>Granting special permissions to issue creators</li>
       <li>Combining relationships with role-based permissions</li>
@@ -760,7 +762,7 @@ test "repository maintainers can close issues" {
 <div class="flex flex-col gap-2">
   <p>One common pattern in authorization is managing permissions for hierarchical file/folder structures, where access cascades down from parent to child resources.</p>
   <p>The code on the right demonstrates:</p>
-  <ul class="list-disc ml-6">
+  <ul class="list-disc list-inside">
     <li>Defining relationships between repositories, folders, and files</li>
     <li>Cascading permissions down folder hierarchies</li>
     <li>Recursive role inheritance from parent to child folders</li>
@@ -824,13 +826,13 @@ test "folder roles apply to files" {
   <div class="flex flex-col gap-2">
     <p>Impersonation is a pattern where certain users can temporarily inherit permissions from other users. This is useful for customer support, troubleshooting, and admin oversight.</p>
     <p>For example:</p>
-    <ul class="list-disc ml-6">
+    <ul class="list-disc list-inside">
       <li>Support reps need to see what users see</li>
       <li>HR admins need to act on behalf of employees</li>
       <li>System admins need to debug user issues</li>
     </ul>
     <p>The code on the right demonstrates:</p>
-    <ul class="list-disc ml-6">
+    <ul class="list-disc list-inside">
       <li>Defining impersonation permissions</li>
       <li>Policies for granting temporary access</li>
       <li>Restricting access to sensitive operations</li>
@@ -900,7 +902,7 @@ test "support users can read organizations via impersonation" {
   <div class="flex flex-col gap-2">
     <p>Many companies need their authorization policy to correspond to their org chart, especially in HR systems, recruiting platforms, and CRM tools.</p>
     <p>A common model is having managers or supervisors access data of their direct reports. The code on the right demonstrates:</p>
-    <ul class="list-disc ml-6">
+    <ul class="list-disc list-inside">
       <li>Defining hierarchical manager relationships between users</li>
       <li>Granting repository access up the management chain</li>
       <li>Recursive role inheritance for multi-level hierarchies</li>
@@ -956,21 +958,24 @@ test "manager can have viewer role on employees repos" {
     chapter: 'Attribute-Based Access Control (ABAC)',
     text: `
 <h1 class="text-xl mt-4 mb-2">Attribute-Based Access Control: Public/Private Resources</h1>
-<div class="flex flex-col gap-2">
-  <p>
+<div>
+  <div class="float-left mr-4">
+    <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="/images/abac-bear.png" />
+  </div>
+  <p class="mt-2">
     Attribute-based access control (ABAC) encompasses any scenario where attributes of a resource (like public/private status, sensitivity level), user (like department, clearance level), or environment (like time of day, IP address) determine access.
     Let's look at one common pattern - public/private resources.
   </p>
-  <p>In the code on the right:</p>
-  <ul class="list-disc ml-6">
+  <p class="mt-2">
+    <code>is_public()</code> is a fact that controls whether a given resource is public or private. This is an example of an arbitrary attribute associated with a respository. Your policy can then make authorization decisions based on whether a repository is public or private.
+  </p>
+  <p class="mt-2">In the code on the right:</p>
+  <ul class="list-disc list-inside mt-2">
     <li>The Repository resource has a read permission</li>
     <li>We define a rule that allows anyone to read public repositories</li>
     <li>The test verifies that any user can read a public repository</li>
   </ul>
-  <p>Take a look at the test to understand how public repositories work, and run it to validate that the policy works correctly!</p>
-  <div class="mt-4 w-full text-center">
-    <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6537e31163c7ec0b082fdcae_Knitting%20Bear.png" />
-  </div>
+  <p class="mt-2">Take a look at the test to understand how public repositories work, and run it to validate that the policy works correctly!</p>
 </div>
     `,
     code: `
@@ -1001,7 +1006,7 @@ test "public repositories" {
   <div class="flex flex-col gap-2">
     <p>In multi-tenant systems, different organizations often need different default roles and permissions. Conditional roles enable configurable defaults without duplicating data.</p>
     <p>The code on the right demonstrates:</p>
-    <ul class="list-disc ml-6">
+    <ul class="list-disc list-inside">
       <li>Setting organization-wide default roles</li>
       <li>Inheriting roles based on organization settings</li>
       <li>Controlling who can configure default roles</li>
@@ -1058,7 +1063,7 @@ test "default org role grants permission to org members" {
     <p>Sometimes we want to conditionally inherit roles based on resource attributes rather than relationships.</p>
     <p>A common pattern is having a toggle on the resource itself that restricts access, like a "protected" flag.</p>
     <p>The code on the right demonstrates:</p>
-    <ul class="list-disc ml-6">
+    <ul class="list-disc list-inside">
       <li>Repositories inherit roles from organizations unless the repository is protected</li>
       <li>Explicit roles on the repository override protected repositories</li>
     </ul>
@@ -1117,7 +1122,7 @@ test "protected repositories override org-level access" {
   <p>Time-based permissions are useful for granting temporary access to resources, like giving a contractor access for their contract duration.</p>
   <p>You can add an expiration time to role assignments to automatically revoke access when the time expires.</p>
   <p>The code on the right demonstrates:</p>
-  <ul class="list-disc ml-6">
+  <ul class="list-disc list-inside">
     <li>Defining roles with expiration times</li>
     <li>Comparing expiration times against current time</li>
     <li>Testing expired vs unexpired access</li>
@@ -1163,7 +1168,7 @@ test "access to repositories is conditional on expiry" {
   <div class="flex flex-col gap-2">
     <p>Many applications need to restrict access based on subscription tiers and paid features. This is implemented through entitlements that grant permissions based on a user's role and their organization's subscription.</p>
     <p>The code on the right demonstrates:</p>
-    <ul class="list-disc ml-6">
+    <ul class="list-disc list-inside">
       <li>Defining subscription plans and features</li>
       <li>Tracking quota usage per organization</li>
       <li>Granting permissions based on available quota</li>
@@ -1243,26 +1248,26 @@ test "members can create repositories if they have quota" {
     chapter: 'Wrapping Up',
     text: `
   <h1 class="text-xl mt-4 mb-2">Wrapping Up</h1>
-  <div class="flex flex-col gap-2">
-    <p>Congratulations on completing the Polar authorization language tour! You've learned about:</p>
-    <ul class="list-disc ml-6">
+  <div>
+    <div class="float-left mr-4">
+      <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700 dark:bg-white" src="/images/wrapping-up-bear.png" />
+    </div>
+    <p class="mt-2">Congratulations on completing the Polar authorization language tour! You've learned about:</p>
+    <ul class="list-disc list-inside mt-2">
       <li>Basic rules and permissions</li>
       <li>Role-based access control (RBAC) patterns</li>
       <li>Relationship-based access control (ReBAC)</li>
       <li>Attribute-based access control (ABAC)</li>
     </ul>
-    <p>To continue your authorization journey:</p>
-    <ul class="list-disc ml-6">
+    <p class="mt-2">To continue your authorization journey:</p>
+    <ul class="list-disc list-inside mt-2">
       <li>Visit the <a class="text-indigo-500" href="https://www.osohq.com/docs">Oso documentation</a> to dive deeper into authorization concepts</li>
       <li>Check out the <a class="text-indigo-500" href="https://www.osohq.com/docs/guides">guides and tutorials</a> for practical examples</li>
       <li>Join the <a class="text-indigo-500" href="https://join-slack.osohq.com/">Oso Slack community</a> to connect with other developers</li>
       <li>Browse example <a class="text-indigo-500" href="https://github.com/osohq">projects on GitHub</a> to see authorization in action</li>
     </ul>
-    <p>Remember that building robust authorization is an iterative process. Start simple and add complexity as your needs evolve.</p>
-    <p>Thank you for taking the tour!</p>
-    <div class="mt-4 w-full text-center">
-      <img class="w-48 inline rounded-md" src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65305580ea8b0ee5c729a6c9_IMG_3268%201.png" />
-    </div>
+    <p class="mt-2">Remember that building robust authorization is an iterative process. Start simple and add complexity as your needs evolve.</p>
+    <p class="mt-2">Thank you for taking the tour!</p>
   </div>
     `,
     code: `
@@ -1318,11 +1323,11 @@ const chapterSlugs = {
 };
 
 const chapterImages = {
-  'Basics': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/657b69aa1d2f9b415a0207ce_Oso_Webflow.png',
-  'Role-Based Access Control (RBAC)': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/64ed120c8334a57ea0cc13c0_RBAC_SirMixALot.png',
-  'Relationship-Based Access Control (ReBAC)': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65aa92c45442d6570a3837e8_Group%20163%20(1).png',
-  'Attribute-Based Access Control (ABAC)': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6537e31163c7ec0b082fdcae_Knitting%20Bear.png',
-  'Wrapping Up': 'https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/65305580ea8b0ee5c729a6c9_IMG_3268%201.png'
+  'Basics': '/images/bear1.png',
+  'Role-Based Access Control (RBAC)': '/images/rbac-bear.png',
+  'Relationship-Based Access Control (ReBAC)': '/images/rebac-bear.png',
+  'Attribute-Based Access Control (ABAC)': '/images/abac-bear.png',
+  'Wrapping Up': '/images/wrapping-up-bear.png'
 };
 
 const slugToChapter = Object.fromEntries(

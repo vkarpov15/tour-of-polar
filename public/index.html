@@ -28,20 +28,6 @@
       padding: 2px;
       cursor: col-resize;
     }
-
-    @media (prefers-color-scheme: dark) {
-      .CodeMirror {
-        background: #1a1a1a;
-        color: #fff;
-      }
-      .CodeMirror-gutters {
-        background: #1a1a1a;
-        border-right: 1px solid #333;
-      }
-      .CodeMirror-linenumber {
-        color: #666;
-      }
-    }
   </style>
 
   <link rel="stylesheet" href="/tw.css" />
@@ -260,9 +246,12 @@ const cm = CodeMirror(document.getElementById("editor"), {
 
 // Check for dark mode preference
 if (localStorage.getItem('darkMode') === 'true' ||
-    (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    window.matchMedia('(prefers-color-scheme: dark)').matches) {
   document.documentElement.classList.add('dark');
   cm.setOption('theme', 'monokai');
+} else {
+  document.documentElement.classList.remove('dark');
+  cm.setOption('theme', 'idea');
 }
 
 window.addEventListener('popstate', () => {

@@ -81,6 +81,14 @@ for (const [chapter, sections] of Object.entries(content)) {
 </div>
   `.trim();
 }
+
+// Check for dark mode preference
+if (localStorage.getItem('darkMode') === 'true' ||
+    window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  document.documentElement.classList.add('dark');
+} else {
+  document.documentElement.classList.remove('dark');
+}
 </script>
 
 </html>

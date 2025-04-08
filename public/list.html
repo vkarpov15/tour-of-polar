@@ -21,9 +21,33 @@
   <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/lib/codemirror.css">
   <script src="https://unpkg.com/codemirror@5.65.16/lib/codemirror.js"></script>
   <script src="https://unpkg.com/codemirror@5.65.16/mode/ruby/ruby.js"></script>
-  <script src="content.js"></script>
 
-  <link rel="stylesheet" href="tw.css" />
+  <script>
+    const __BASE_PATH__ = (() => {
+      // Strip off trailing slash if it exists
+      const withoutTrailingSlash = window.location.pathname.replace(/\/$/, '');
+
+      // Strip off everything after the last remaining slash
+      const lastSlashIndex = withoutTrailingSlash.lastIndexOf('/');
+      if (lastSlashIndex === -1) {
+        return '';
+      }
+      return withoutTrailingSlash.slice(0, lastSlashIndex);
+    })();
+
+    console.log('Base Path', __BASE_PATH__);
+
+    document.write(`<script src="${__BASE_PATH__}/content.js"><\/script>`);
+    document.write(`<link rel="stylesheet" href="${__BASE_PATH__}/tw.css" />`);
+
+    // Update href attributes after base path is defined
+    window.addEventListener('DOMContentLoaded', () => {
+      if (__BASE_PATH__ !== '') {
+        document.getElementById('logo-link').href = __BASE_PATH__ + '/';
+        document.getElementById('list-link').href = __BASE_PATH__ + '/list';
+      }
+    });
+  </script>
 </head>
 
 <body class="dark:bg-gray-900 dark:text-white">
@@ -35,7 +59,7 @@
   <div class="flex flex-col h-screen w-screen">
     <header class="bg-indigo-600 text-white flex justify-between">
       <div class="px-4 py-2">
-        <h1 class="text-2xl font-bold"><a href="/"><img src="https://www.osohq.com/docs/logo-bear-white.png" class="inline h-[1em] mr-1"> A Tour of Polar</a></h1>
+        <h1 class="text-2xl font-bold"><a id="logo-link" href="/"><img src="https://www.osohq.com/docs/logo-bear-white.png" class="inline h-[1em] mr-1"> A Tour of Polar</a></h1>
       </div>
       <div class="flex items-center">
         <button onclick="toggleDarkMode()" class="p-2 mr-2 rounded-lg hover:bg-indigo-700 dark:bg-indigo-800">
@@ -43,7 +67,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
           </svg>
         </button>
-        <a href="/list"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 m-2">
+        <a href="/list" id="list-link"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 m-2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg></a>
       </div>

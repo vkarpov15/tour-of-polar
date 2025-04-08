@@ -10,6 +10,40 @@
   })(window,document,'script','dataLayer','GTM-MK29QFG');</script>
   <!-- End Google Tag Manager -->
 
+  <script>
+    // Handle running under different base paths
+    const chapterSlugKeys = [
+      'basics',
+      'rbac',
+      'rebac',
+      'abac',
+      'wrapping-up'
+    ];
+
+    const __BASE_PATH__ = (() => {
+      const path = window.location.pathname.replace(/\/$/, '');
+      let match;
+      for (const slug of chapterSlugKeys) {
+        match = path.match(new RegExp(`^(.*?)/${slug}/\\d+$`));
+        if (match) return match[1];
+      }
+      return path;
+    })();
+
+    console.log('Base Path', __BASE_PATH__);
+
+    document.write(`<script src="${__BASE_PATH__}/content.js"><\/script>`);
+    document.write(`<link rel="stylesheet" href="${__BASE_PATH__}/tw.css" />`);
+
+    // Update href attributes after base path is defined
+    window.addEventListener('DOMContentLoaded', () => {
+      if (__BASE_PATH__ !== '') {
+        document.getElementById('logo-link').href = __BASE_PATH__ + '/';
+        document.getElementById('list-link').href = __BASE_PATH__ + '/list';
+      }
+    });
+  </script>
+
   <!-- favicons -->
   <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.prod.website-files.com/5f148310b9588c295ed77f20/6222613fc7d2ef9b8b5312f8_logo-black.png">
   <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.prod.website-files.com/5f148310b9588c295ed77f20/6222613fc7d2ef9b8b5312f8_logo-black.png">
@@ -23,7 +57,6 @@
   <script src="https://unpkg.com/codemirror@5.65.16/mode/ruby/ruby.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/theme/monokai.css">
   <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/theme/idea.css">
-  <script src="/content.js"></script>
 
   <style>
     .CodeMirror { height: 100%; }
@@ -37,8 +70,6 @@
       cursor: col-resize;
     }
   </style>
-
-  <link rel="stylesheet" href="/tw.css" />
 </head>
 
 <body class="dark:bg-gray-900 dark:text-white">
@@ -50,7 +81,11 @@
   <div class="flex flex-col h-screen w-screen">
     <header class="bg-indigo-600 text-white flex justify-between dark:bg-indigo-900">
       <div class="px-4 py-2">
-        <h1 class="text-2xl font-bold"><a href="/"><img src="https://www.osohq.com/docs/logo-bear-white.png" class="inline h-[1em] mr-1"> A Tour of Polar</a></h1>
+        <h1 class="text-2xl font-bold">
+          <a id="logo-link" href="/">
+            <img src="https://www.osohq.com/docs/logo-bear-white.png" class="inline h-[1em] mr-1"> A Tour of Polar
+          </a>
+        </h1>
       </div>
       <div class="flex items-center">
         <button onclick="toggleDarkMode()" class="p-2 mr-2 rounded-lg hover:bg-indigo-700 dark:bg-indigo-800">
@@ -58,7 +93,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
           </svg>
         </button>
-        <a href="/list"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 m-2">
+        <a id="list-link" href="/list"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 m-2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg></a>
       </div>
@@ -132,7 +167,7 @@ function updatePage(pushState) {
   updatePageDisplay();
   const chapterSlug = chapterSlugs[currentChapter];
   if (pushState) {
-    history.pushState(null, '', `/${chapterSlug}/${currentPage + 1}`);
+    history.pushState(null, '', `${__BASE_PATH__}/${chapterSlug}/${currentPage + 1}`);
   }
   cm.focus();
 }
@@ -164,7 +199,7 @@ async function runCode() {
   let error = null;
   try {
     results.innerHTML = '<div class="animate-spin h-5 w-5 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>';
-    const response = await fetch('/api/exec', {
+    const response = await fetch(`${__BASE_PATH__}/api/exec`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -217,7 +252,7 @@ async function runCode() {
 }
 
 // Get chapter and page from URL
-const path = window.location.pathname;
+const path = window.location.pathname.slice(0, __BASE_PATH__.length);
 if (path !== '/') {
   const [, chapterSlug, pageNum] = path.split('/');
   const chapter = Object.keys(content).find(c => chapterSlugs[c] === chapterSlug);
@@ -237,7 +272,7 @@ updatePageDisplay();
 
 // Set initial URL
 const initialChapterSlug = chapterSlugs[currentChapter];
-history.replaceState(null, '', `/${initialChapterSlug}/${currentPage + 1}`);
+history.replaceState(null, '', `${__BASE_PATH__}/${initialChapterSlug}/${currentPage + 1}`);
 
 track('PAGE_LOAD', { currentChapter, currentPage });
 
@@ -267,7 +302,7 @@ if (localStorage.getItem('darkMode') === 'true' ||
 }
 
 window.addEventListener('popstate', () => {
-  const path = window.location.pathname;
+  const path = window.location.pathname.slice(0, __BASE_PATH__.length);
   if (path !== '/') {
     const [, chapterSlug, pageNum] = path.split('/');
     const chapter = Object.keys(content).find(c => chapterSlugs[c] === chapterSlug);
@@ -381,7 +416,7 @@ function track(type, data = {}) {
     Math.random().toString(36).slice(2) + Date.now().toString(36);
   sessionStorage.setItem('sessionId', sessionId);
 
-  return fetch('/api/track', {
+  return fetch(`${__BASE_PATH__}/api/track`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

@@ -4,7 +4,7 @@ const content = [
 <h1 class="text-xl mt-4 mb-2">Getting Started</h1>
 <div>
   <div class="float-left mr-4">
-    <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="/images/bear1.png" />
+    <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/bear1.png" />
   </div>
   <p>Welcome to a tour of the <a class="text-indigo-500" href="https://www.osohq.com/docs/oss/reference/polar.html">Polar authorization language.</a></p>
   <p class="mt-2">The tour is divided into a list of modules that you can access by clicking on <a class="text-indigo-500">A Tour of Polar</a> on the top left of the page.</p>
@@ -132,7 +132,7 @@ test "Owners can view and edit items" {
   <h1 class="text-xl mt-4 mb-2">Role-Based Access Control: Resource-Specific Roles</h1>
   <div>
     <div class="float-left mr-4">
-      <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="/images/rbac-bear.png" />
+      <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/rbac-bear.png" />
     </div>
     <p class="mt-2">Almost every application starts with roles at the organization level. But it's a very coarse model since it only allows you to grant access to all resources in an organization.</p>
     <p class="mt-2">A natural way to provide more fine-grained access is to extend the concept of roles to other resources in the application.</p>
@@ -622,7 +622,7 @@ test "custom roles grant the permissions they are assigned" {
 <h1 class="text-xl mt-4 mb-2">Relationship-Based Access Control: User Groups</h1>
 <div>
   <div class="float-left mr-4">
-    <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="/images/rebac-bear.png" />
+    <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/rebac-bear.png" />
   </div>
   <p class="mt-2">Relationship-based access control (ReBAC) means organizing permissions based on relationships between resources. Let's look at a basic example involving groups and repositories.</p>
   <p class="mt-2">So far, your policies have only had one type of actor: a user. This policy has two actors: users and groups.</p>
@@ -960,7 +960,7 @@ test "manager can have viewer role on employees repos" {
 <h1 class="text-xl mt-4 mb-2">Attribute-Based Access Control: Public/Private Resources</h1>
 <div>
   <div class="float-left mr-4">
-    <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="/images/abac-bear.png" />
+    <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/abac-bear.png" />
   </div>
   <p class="mt-2">
     Attribute-based access control (ABAC) encompasses any scenario where attributes of a resource (like public/private status, sensitivity level), user (like department, clearance level), or environment (like time of day, IP address) determine access.
@@ -1250,7 +1250,7 @@ test "members can create repositories if they have quota" {
   <h1 class="text-xl mt-4 mb-2">Wrapping Up</h1>
   <div>
     <div class="float-left mr-4">
-      <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700 dark:bg-white" src="/images/wrapping-up-bear.png" />
+      <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700 dark:bg-white" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/wrapping-up-bear.png" />
     </div>
     <p class="mt-2">Congratulations on completing the Polar authorization language tour! You've learned about:</p>
     <ul class="list-disc list-inside mt-2">
@@ -1323,11 +1323,11 @@ const chapterSlugs = {
 };
 
 const chapterImages = {
-  'Basics': '/images/bear1.png',
-  'Role-Based Access Control (RBAC)': '/images/rbac-bear.png',
-  'Relationship-Based Access Control (ReBAC)': '/images/rebac-bear.png',
-  'Attribute-Based Access Control (ABAC)': '/images/abac-bear.png',
-  'Wrapping Up': '/images/wrapping-up-bear.png'
+  'Basics': 'https://meanitsoftware.s3.us-east-1.amazonaws.com/bear1.png',
+  'Role-Based Access Control (RBAC)': 'https://meanitsoftware.s3.us-east-1.amazonaws.com/rbac-bear.png',
+  'Relationship-Based Access Control (ReBAC)': 'https://meanitsoftware.s3.us-east-1.amazonaws.com/rebac-bear.png',
+  'Attribute-Based Access Control (ABAC)': 'https://meanitsoftware.s3.us-east-1.amazonaws.com/abac-bear.png',
+  'Wrapping Up': 'https://meanitsoftware.s3.us-east-1.amazonaws.com/wrapping-up-bear.png'
 };
 
 const slugToChapter = Object.fromEntries(

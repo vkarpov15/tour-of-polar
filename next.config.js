@@ -18,12 +18,12 @@ module.exports = {
     ];
   },
   async redirects() {
-      return [
-        {
-          source: '/studio',
-          destination: '/studio/index.html',
-          permanent: true,
-        }
-      ];
-    },
+    return [
+      {
+        source: '/studio',
+        destination: '/studio/index.html',
+        permanent: true,
+      }
+    ];
+  }
 };

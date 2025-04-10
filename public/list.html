@@ -56,7 +56,7 @@
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
 
-  <div class="flex flex-col h-screen w-screen">
+  <div class="flex flex-col h-screen w-full">
     <header class="bg-indigo-600 text-white flex justify-between">
       <div class="px-4 py-2">
         <h1 class="text-2xl font-bold"><a id="logo-link" href="/"><img src="https://www.osohq.com/docs/logo-bear-white.png" class="inline h-[1em] mr-1"> A Tour of Polar</a></h1>
@@ -98,7 +98,7 @@ for (const [chapter, sections] of Object.entries(content)) {
   const sectionsHTML = sections.map((section, index) => `
 <div class="p-2 relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
   <div class="min-w-0 flex-1">
-    <a href="/${chapterSlugs[chapter]}/${index + 1}" class="focus:outline-none">
+    <a href="${__BASE_PATH__}/${chapterSlugs[chapter]}/${index + 1}" class="focus:outline-none">
       <p class="font-medium text-gray-900 dark:text-white">${section.title}</p>
       <p class="truncate text-sm text-gray-500 dark:text-gray-400">${section.description}</p>
     </a>

@@ -56,7 +56,6 @@
   <script src="https://unpkg.com/codemirror@5.65.16/lib/codemirror.js"></script>
   <script src="https://unpkg.com/codemirror@5.65.16/mode/ruby/ruby.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/theme/monokai.css">
-  <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/theme/idea.css">
 
   <style>
     .CodeMirror { height: 100%; }
@@ -112,7 +111,18 @@
       </div>
       <div id="drag-bar-vert" class="bg-gray-300 dark:bg-gray-700"></div>
       <div class="w-1/2 flex flex-col h-[calc(100vh-48px)] overflow-hidden">
-        <div id="editor" class="h-1/2"></div>
+        <div id="editorWrapper" class="h-1/2 flex relative">
+          <div class="absolute left-2 top-1 font-bold">Policy</div>
+          <div id="editor" class="h-full w-1/2 border-r border-gray-700 pt-8"></div>
+          <div id="facts" class="h-full w-1/2 flex flex-col p-2">
+            <h2 class="font-bold">Facts</h2>
+            <div class="flex gap-2 mt-2">
+              <input id="factInput" type="text" class="flex-grow border border-gray-300 rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter fact">
+              <button onclick="addFact()" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 dark:bg-indigo-800 dark:hover:bg-indigo-700">Add</button>
+            </div>
+            <div id="factList" class="mt-4 flex flex-col gap-2"></div>
+          </div>
+        </div>
         <div id="drag-bar" class="bg-gray-300 dark:bg-gray-700"></div>
         <div class="w-full h-1/2">
           <div class="w-full bg-gray-100 p-3 flex items-center gap-2 dark:bg-gray-800">
@@ -122,7 +132,7 @@
             <input
               id="authorizeQuery"
               type="text"
-              value='User{"alice"} "read" Organization{"acme"})'
+              value='User:alice "read" Organization:acme'
               class="border flex-grow border-gray-300 rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono" placeholder="Enter text...">
             <button id="runButton" onclick="runCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-slate-500 dark:bg-indigo-800 dark:hover:bg-indigo-700">Run</button>
           </div>
@@ -138,6 +148,32 @@
 <script>
 let currentChapter = Object.keys(content)[0];
 let currentPage = 0;
+let contextFacts = [];
+
+function addFact() {
+  const input = document.getElementById('factInput');
+  const fact = input.value.trim();
+  if (fact) {
+    contextFacts.push(fact);
+    input.value = '';
+    updateFactList();
+  }
+}
+
+function removeFact(index) {
+  contextFacts.splice(index, 1);
+  updateFactList();
+}
+
+function updateFactList() {
+  const factList = document.getElementById('factList');
+  factList.innerHTML = contextFacts.map((fact, i) => `
+    <div class="flex gap-2 items-center">
+      <div class="flex-grow font-mono text-sm">${fact}</div>
+      <button onclick="removeFact(${i})" class="text-red-500 hover:text-red-700">&times;</button>
+    </div>
+  `).join('');
+}
 
 function previousPage() {
   if (currentPage > 0) {
@@ -208,12 +244,17 @@ async function runCode() {
   let error = null;
   try {
     results.innerHTML = '<div class="animate-spin h-5 w-5 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>';
+
     const response = await fetch(`${__BASE_PATH__}/api/exec`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ code, authorizeQuery })
+      body: JSON.stringify({
+        code,
+        authorizeQuery,
+        contextFacts
+      })
     });
     const result = await response.json();
     let displayResult = '';
@@ -302,7 +343,7 @@ const cm = CodeMirror(document.getElementById("editor"), {
   tabSize: 2,
   autofocus: true,
   mode: "ruby",
-  theme: document.documentElement.classList.contains('dark') ? 'monokai' : 'idea',
+  theme: document.documentElement.classList.contains('dark') ? 'monokai' : 'default',
   extraKeys: {
     "Shift-Enter": function(cm) {
       runCode();
@@ -317,7 +358,7 @@ if (localStorage.getItem('darkMode') === 'true' ||
   cm.setOption('theme', 'monokai');
 } else {
   document.documentElement.classList.remove('dark');
-  cm.setOption('theme', 'idea');
+  cm.setOption('theme', 'default');
 }
 
 window.addEventListener('popstate', () => {
@@ -351,6 +392,7 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
   // Vertical drag bar
   const dragBar = document.getElementById('drag-bar');
+  const editorWrapperDiv = document.getElementById('editorWrapper');
   const editorDiv = document.getElementById('editor');
   const resultsDiv = document.getElementById('results').parentElement;
   let isDragging = false;
@@ -361,14 +403,14 @@ window.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     isDragging = true;
     initialMouseY = e.clientY || e.pageY;
-    initialEditorHeight = editorDiv.offsetHeight;
+    initialEditorHeight = editorWrapperDiv.offsetHeight;
   });
 
   document.addEventListener('mousemove', (e) => {
     if (isDragging) {
       const mouseY = e.clientY || e.pageY;
-      const containerTop = editorDiv.parentElement.offsetTop;
-      const containerHeight = editorDiv.parentElement.offsetHeight;
+      const containerTop = editorWrapperDiv.parentElement.offsetTop;
+      const containerHeight = editorWrapperDiv.parentElement.offsetHeight;
 
       const mouseMovementY = mouseY - initialMouseY;
       const newEditorHeight = Math.max(initialEditorHeight + mouseMovementY, 0);
@@ -376,7 +418,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const editorHeight = (newEditorHeight / containerHeight) * 100;
       const resultsHeight = 100 - editorHeight;
 
-      editorDiv.style.height = `${editorHeight}%`;
+      editorWrapperDiv.style.height = `${editorHeight}%`;
       resultsDiv.style.height = `${resultsHeight}%`;
       cm.refresh();
     }
@@ -426,7 +468,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function toggleDarkMode() {
   document.documentElement.classList.toggle('dark');
   localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-  cm.setOption('theme', document.documentElement.classList.contains('dark') ? 'monokai' : 'idea');
+  cm.setOption('theme', document.documentElement.classList.contains('dark') ? 'monokai' : 'default');
   track('TOGGLE_DARK_MODE', { darkMode: document.documentElement.classList.contains('dark') });
 }
 

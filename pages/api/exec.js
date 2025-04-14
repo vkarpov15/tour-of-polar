@@ -16,7 +16,7 @@ let oso = null;
 
 export default async function exec(req, res) {
   try {
-    const { code, authorizeQuery } = req.body;
+    const { code, authorizeQuery, contextFacts } = req.body;
     if (typeof code !== 'string') {
       throw new Error('Code must be a string');
     }
@@ -27,9 +27,10 @@ export default async function exec(req, res) {
       oso = new Oso(url, apiKey);
     }
 
-    const result = await oso.policy(code) ?? {};
+    await oso.policy(code);
 
-    const authorizeResult = authorizeQuery ? await oso.authorize(...parseAuthorizeQuery(authorizeQuery)) : null;
+    console.log(...parseAuthorizeQuery(authorizeQuery), contextFacts.map(factStr => parseFact(factStr)));
+    const authorizeResult = authorizeQuery ? await oso.authorize(...parseAuthorizeQuery(authorizeQuery), contextFacts.map(factStr => parseFact(factStr))) : null;
 
     res.status(200).json({ authorizeResult });
   } catch (err) {
@@ -38,6 +39,16 @@ export default async function exec(req, res) {
       error: err.message
     });
   }
+}
+
+function parseFact(factStr) {
+  return factStr.trim().split(/\s+/).map(token => {
+    if (token.indexOf(':') !== -1) {
+      const [type, id] = [token.slice(0, token.indexOf(':')), token.slice(token.indexOf(':') + 1)].map(tok => tok.replace(/^"/, '').replace(/"$/, ''));
+      return { type, id };
+    }
+    return token.replace(/^"/, '').replace(/"$/, '');
+  });
 }
 
 function parseAuthorizeQuery(authorizeString) {
@@ -62,7 +73,7 @@ function parseAuthorizeQuery(authorizeString) {
     throw new Error(`Resource ID must be set: ${resource.type}:<id>`);
   }
 
-  return parts;
+  return [actor, action.id, resource];
 }
 
 function extractLegacyTypedId(token) {

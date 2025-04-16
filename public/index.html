@@ -139,7 +139,7 @@
               id="authorizeQuery"
               type="text"
               value='User:alice "read" Organization:acme'
-              class="border flex-grow border-gray-300 rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono" placeholder="Enter text...">
+              class="border flex-grow border-gray-300 rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono" placeholder="User:alice read Organization:acme">
             <button id="runButton" onclick="runCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-slate-500 dark:bg-indigo-800 dark:hover:bg-indigo-700">Run</button>
           </div>
           <pre id="results" class="p-4 h-[calc(100%-64px)] overflow-y-auto relative dark:text-gray-300">
@@ -198,6 +198,10 @@ function parseFactOrQuery(factStr) {
     if (token.startsWith('"') && token.endsWith('"')) {
       return token.slice(1, -1);
     }
+    // If token is all digits, treat as a number
+    if (/^\d+$/.test(token)) {
+      return parseInt(token);
+    }
     if (token.indexOf(':') !== -1) {
       const [type, id] = [
         token.slice(0, token.indexOf(':')),
@@ -210,7 +214,7 @@ function parseFactOrQuery(factStr) {
 }
 
 function stringifyFact(fact) {
-  return fact.map(param => typeof param === 'string' ? param : `${param.type}:${param.id}`).join(' ');
+  return fact.map(param => typeof param === 'string' || typeof param === 'number' ? param : `${param.type}:${param.id}`).join(' ');
 }
 
 function updateFactList() {
@@ -262,6 +266,7 @@ function updatePage(pushState) {
   cm.setValue(page.code.trim());
   document.getElementById('pageContent').innerHTML = page.text;
   document.getElementById('results').innerHTML = '<img src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6793da36f7a5080d73228681_File%20Sharing%20Bear.png" class="absolute bottom-0 h-48 left-1/2 -translate-x-1/2">';
+
   updatePageDisplay();
   const chapterSlug = chapterSlugs[currentChapter];
   if (pushState) {
@@ -286,6 +291,17 @@ function updatePageDisplay() {
   results.classList.remove('border-2');
   results.classList.remove('border-green-500');
   results.classList.remove('border-red-500');
+
+  const page = content[currentChapter][currentPage];
+  if (page.authorizeQuery) {
+    document.getElementById('authorizeQuery').value = page.authorizeQuery;
+  } else {
+    document.getElementById('authorizeQuery').value = '';
+  }
+  if (page.contextFacts) {
+    contextFacts = page.contextFacts;
+    updateFactList();
+  }
 }
 
 async function runCode() {

@@ -17,14 +17,23 @@ const content = [
     <li><code>Page Down</code>: Next page</li>
   </ul>
   <p class="mt-2">The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
-  <p class="mt-2">Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a bare bones policy which only defines object.</p>
-  <p class="mt-2">Click "Run" to execute the Polar policy. You should see "Policy executed successfully" in the results panel once the policy has been run.</p>
+  <p class="mt-2">Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a minimal policy which indicates that users can read organizations if they are an admin.</p>
+  <p class="mt-2">Click "Run" to execute the authorization query with the provided policy. You should see "Result: allowed" in the results panel once the policy has been run, which means the authorization query succeeded.</p>
 </div>
     `,
     code: `
 actor User {}
-resource Organization {}
+resource Organization {
+  permissions = ["read"];
+  roles = ["admin"];
+
+  "read" if "admin";
+}
     `,
+    authorizeQuery: 'User:alice read Organization:acme',
+    contextFacts: [
+      ['has_role', { type: 'User', id: 'alice' }, 'admin', { type: 'Organization', id: 'acme' }]
+    ],
     title: 'Getting Started',
     description: 'Learn how to use this tour',
     chapter: 'Basics'
@@ -59,67 +68,13 @@ resource Item {
   "viewer" if "owner";
 }
     `,
+    authorizeQuery: 'User:alice view Item:test',
+    contextFacts: [
+      ['has_role', { type: 'User', id: 'alice' }, 'owner', { type: 'Item', id: 'test' }],
+      ['has_role', { type: 'User', id: 'bob' }, 'viewer', { type: 'Item', id: 'test' }]
+    ],
     title: 'Basic Rules',
     description: 'Learn how to write simple rules and permissions in Polar',
-    chapter: 'Basics'
-  },
-
-
-  {
-    text: `
-<h1 class="text-xl mt-4 mb-2">Introducing Testing</h1>
-<div class="flex flex-col gap-2">
-  <p>Next, let's take a look at how to write policy tests in Polar. Tests let you check that your policies do what you expect.</p>
-  <p>On the right you'll see an example of a simple policy that gives members viewing permissions on organizations.</p>
-  <p>The policy code is divided into two main parts:</p>
-  <ol class="list-disc list-inside">
-    <li>The rules section at the top (including actor/resource definitions and permission rules) define what actions are allowed</li>
-    <li>The test section at the bottom verifies that the policy works as expected given some data defined in <code>setup {}</code></li>
-  </ol>
-  <p>
-    Try running the code! So far, policies in this tour executed without any errors. This policy includes an intentional error to demonstrate what happens when tests fail. The test expects Alice to have view permission, but we haven't granted her the required member role yet.
-  </p>
-  <p>You can fix the assertion error by uncommenting line 29:</p>
-  <pre class="inline">has_role(User{"alice"}, "owner", Item{"foo"});</pre>
-</div>
-    `,
-    code: `
-################
-# Rules section:
-################
-actor User {}
-resource Item {
-  roles = ["viewer", "owner"];
-  permissions = ["view", "edit"];
-
-  "view" if "viewer";
-  "edit" if "owner";
-  "viewer" if "owner";
-}
-
-###############
-# Test section:
-###############
-test "Viewers can view items" {
-  setup {
-    # This code defines a _fact_ in Oso. Facts are a flexible data model for representing authorization data.
-    # The following fact says that "alice" has the role "viewer" on the item "foo".
-    has_role(User{"alice"}, "viewer", Item{"foo"});
-  }
-  assert has_permission(User{"alice"}, "view", Item{"foo"});
-  assert_not has_permission(User{"alice"}, "edit", Item{"foo"});
-}
-
-test "Owners can view and edit items" {
-  setup {
-    # has_role(User{"alice"}, "owner", Item{"foo"});
-  }
-  assert has_permission(User{"alice"}, "view", Item{"foo"});
-  assert has_permission(User{"alice"}, "edit", Item{"foo"});
-}
-    `,
-    title: 'Introducing Testing',
-    description: 'Learn how to write test cases in Polar',
     chapter: 'Basics'
   },
 
@@ -180,33 +135,13 @@ has_role(user: User, role: String, repository: Repository) if
   org matches Organization and
   has_relation(repository, "organization", org) and
   has_role(user, role, org);
-
-test "org members inherit permissions on repositories belonging to the org" {
-  setup {
-    has_role(User{"alice"}, "member", Organization{"acme"});
-    has_relation(Repository{"anvil"}, "organization", Organization{"acme"});
-    has_relation(Repository{"bar"}, "organization", Organization{"foo"});
-  }
-
-  assert allow(User{"alice"}, "read", Organization{"acme"});
-  assert allow(User{"alice"}, "read", Repository{"anvil"});
-
-  assert_not allow(User{"alice"}, "delete", Repository{"anvil"});
-  assert_not allow(User{"alice"}, "read", Repository{"bar"});
-}
-
-test "repository admins can delete repositories, regardless of their organization role" {
-  setup {
-    has_role(User{"alice"}, "member", Organization{"acme"});
-    has_relation(Repository{"anvil"}, "organization", Organization{"acme"});
-    has_relation(Repository{"deleteme"}, "organization", Organization{"acme"});
-    has_role(User{"alice"}, "admin", Repository{"deleteme"});
-  }
-
-  assert_not allow(User{"alice"}, "delete", Repository{"anvil"});
-  assert allow(User{"alice"}, "delete", Repository{"deleteme"});
-}
-      `
+      `,
+      authorizeQuery: 'User:alice read Repository:anvil',
+      contextFacts: [
+        ['has_role', { type: 'User', id: 'alice' }, 'member', { type: 'Organization', id: 'acme' }],
+        ['has_relation', { type: 'Repository', id: 'anvil' }, 'organization', { type: 'Organization', id: 'acme' }],
+        ['has_relation', { type: 'Repository', id: 'bar' }, 'organization', { type: 'Organization', id: 'foo' }]
+      ]
   },
 
 
@@ -255,17 +190,12 @@ resource Organization {
   "read" if "member";
   "write" if "admin";
 }
-
-test "global admins can read all organizations" {
-  setup {
-    has_role(User{"alice"}, "superadmin");
-  }
-
-  # Test global role permissions
-  assert allow(User{"alice"}, "read", Organization{"acme"});
-  assert allow(User{"alice"}, "read", Organization{"foobar"});
-}
-    `
+    `,
+    authorizeQuery: 'User:alice read Organization:acme',
+    contextFacts: [
+      ['has_role', { type: 'User', id: 'alice' }, 'superadmin'],
+      ['has_role', { type: 'User', id: 'bob' }, 'member', { type: 'Organization', id: 'acme' }]
+    ]
   },
 
 
@@ -319,27 +249,14 @@ resource File {
   "read" if "reader";
   "write" if "writer";
 }
-
-test "folder roles apply to files" {
-  setup {
-    has_role(User{"alice"}, "reader", Repository{"anvil"});
-    has_relation(Folder{"python"}, "repository", Repository{"anvil"});
-    has_relation(Folder{"tests"}, "folder", Folder{"python"});
-    has_relation(File{"test.py"}, "folder", Folder{"tests"});
-  }
-
-  assert allow(User{"alice"}, "read", File{"test.py"});
-}
-
-test "long-form role inheritance" {
-  setup {
-    has_relation(File{"test.py"}, "folder", Folder{"tests"});
-    has_role(User{"alice"}, "writer", File{"test.py"});
-  }
-
-  assert allow(User{"alice"}, "write", File{"test.py"});
-}
-    `
+    `,
+    authorizeQuery: 'User:alice read File:test.py',
+    contextFacts: [
+      ['has_role', { type: 'User', id: 'alice' }, 'reader', { type: 'Repository', id: 'anvil' }],
+      ['has_relation', { type: 'Folder', id: 'python' }, 'repository', { type: 'Repository', id: 'anvil' }],
+      ['has_relation', { type: 'Folder', id: 'tests' }, 'folder', { type: 'Folder', id: 'python' }],
+      ['has_relation', { type: 'File', id: 'test.py' }, 'folder', { type: 'Folder', id: 'tests' }]
+    ]
   },
 
 
@@ -385,31 +302,13 @@ resource Issue {
   "update" if "creator";
   "close" if "creator";
   "close" if "admin";
-}
-
-test "issue creator can update and close issues" {
-  setup {
-    has_relation(Issue{"537"}, "repository", Repository{"anvil"});
-    has_relation(Issue{"42"}, "repository", Repository{"anvil"});
-    has_relation(Issue{"537"}, "creator", User{"alice"});
-  }
-
-  assert allow(User{"alice"}, "close", Issue{"537"});
-  assert allow(User{"alice"}, "update", Issue{"537"});
-  assert_not allow(User{"alice"}, "close", Issue{"42"});
-}
-
-test "repository maintainers can close issues" {
-  setup {
-    has_relation(Issue{"537"}, "repository", Repository{"anvil"});
-    has_relation(Issue{"42"}, "repository", Repository{"anvil"});
-    has_relation(Issue{"537"}, "creator", User{"alice"});
-    has_role(User{"bob"}, "maintainer", Repository{"anvil"});
-  }
-  assert allow(User{"bob"}, "close", Issue{"537"});
-  assert_not allow(User{"bob"}, "update", Issue{"537"});
-  assert allow(User{"bob"}, "close", Issue{"42"});
-}`
+}`,
+    authorizeQuery: 'User:alice close Issue:537',
+    contextFacts: [
+      ['has_relation', { type: 'Issue', id: '537' }, 'repository', { type: 'Repository', id: 'anvil' }],
+      ['has_relation', { type: 'Issue', id: '537' }, 'creator', { type: 'User', id: 'alice' }],
+      ['has_role', { type: 'User', id: 'bob' }, 'maintainer', { type: 'Repository', id: 'anvil' }]
+    ]
   },
 
 
@@ -450,17 +349,12 @@ resource Repository {
   "read" if "reader";
   "invite" if "admin";
 }
-
-test "admin can invite readers" {
-  setup {
-    has_role(User{"alice"}, "admin", Repository{"anvil"});
-    has_role(User{"bob"}, "reader", Repository{"anvil"});
-  }
-
-  assert allow(User{"alice"}, "invite", Repository{"anvil"});
-  assert allow(User{"bob"}, "read", Repository{"anvil"});
-}
-    `
+    `,
+    authorizeQuery: 'User:alice invite Repository:anvil',
+    contextFacts: [
+      ['has_role', { type: 'User', id: 'alice' }, 'admin', { type: 'Repository', id: 'anvil' }],
+      ['has_role', { type: 'User', id: 'bob' }, 'reader', { type: 'Repository', id: 'anvil' }]
+    ]
   },
 
 
@@ -508,20 +402,11 @@ resource Organization {
   # permissions on child resources
   "repository.read" if "member";
   "repository.delete" if "admin";
-}
-
-test "org members can read organizations, and read repositories for organizations" {
-  setup {
-    has_role(User{"alice"}, "member", Organization{"acme"});
-  }
-
-  assert allow(User{"alice"}, "read", Organization{"acme"});
-  assert allow(User{"alice"}, "repository.read", Organization{"acme"});
-
-  assert_not allow(User{"alice"}, "repository.delete", Organization{"acme"});
-  assert_not allow(User{"alice"}, "read", Organization{"foobar"});
-}
-    `
+}`,
+    authorizeQuery: 'User:alice read Organization:acme',
+    contextFacts: [
+      ['has_role', { type: 'User', id: 'alice' }, 'member', { type: 'Organization', id: 'acme' }]
+    ]
   },
 
 
@@ -591,26 +476,15 @@ resource Repository {
 
   "read" if "repository.read" on "organization";
   "delete" if "repository.delete" on "organization";
-}
-
-test "custom roles grant the permissions they are assigned" {
-  setup {
-    # repository admins can create + delete repositories
-    # but don't have full admin permissions on the organization
-    grants_permission(Role{"repo-admin"}, "repository.read");
-    grants_permission(Role{"repo-admin"}, "repository.create");
-    grants_permission(Role{"repo-admin"}, "repository.delete");
-    has_role(User{"alice"}, Role{"repo-admin"}, Organization{"acme"});
-    has_relation(Repository{"anvil"}, "organization", Organization{"acme"});
-  }
-
-  assert allow(User{"alice"}, "repository.create", Organization{"acme"});
-  assert allow(User{"alice"}, "read", Repository{"anvil"});
-  assert allow(User{"alice"}, "delete", Repository{"anvil"});
-
-  assert_not allow(User{"alice"}, "add_member", Organization{"acme"});
-}
-    `
+}`,
+    authorizeQuery: 'User:alice repository.create Organization:acme',
+    contextFacts: [
+      ['grants_permission', { type: 'Role', id: 'repo-admin' }, 'repository.read'],
+      ['grants_permission', { type: 'Role', id: 'repo-admin' }, 'repository.create'],
+      ['grants_permission', { type: 'Role', id: 'repo-admin' }, 'repository.delete'],
+      ['has_role', { type: 'User', id: 'alice' }, { type: 'Role', id: 'repo-admin' }, { type: 'Organization', id: 'acme' }],
+      ['has_relation', { type: 'Repository', id: 'anvil' }, 'organization', { type: 'Organization', id: 'acme' }]
+    ]
   },
 
 
@@ -663,21 +537,14 @@ has_role(user: User, role: String, resource: Resource) if
   group matches Group and
   has_group(user, group) and
   has_role(group, role, resource);
-
-test "group members can read repositories" {
-  setup {
-    has_role(Group{"anvil-readers"}, "reader", Repository{"anvil"});
-
-    has_group(User{"alice"}, Group{"anvil-readers"});
-    has_group(User{"bob"}, Group{"anvil-readers"});
-    has_group(User{"charlie"}, Group{"anvil-readers"});
-  }
-
-  assert allow(User{"alice"}, "read", Repository{"anvil"});
-  assert allow(User{"bob"}, "read", Repository{"anvil"});
-  assert allow(User{"charlie"}, "read", Repository{"anvil"});
-}
-    `
+    `,
+    authorizeQuery: 'User:alice read Repository:anvil',
+    contextFacts: [
+      ['has_role', { type: 'Group', id: 'anvil-readers' }, 'reader', { type: 'Repository', id: 'anvil' }],
+      ['has_group', { type: 'User', id: 'alice' }, { type: 'Group', id: 'anvil-readers' }],
+      ['has_group', { type: 'User', id: 'bob' }, { type: 'Group', id: 'anvil-readers' }],
+      ['has_group', { type: 'User', id: 'charlie' }, { type: 'Group', id: 'anvil-readers' }]
+    ]
   },
 
 
@@ -725,31 +592,13 @@ resource Issue {
   "close" if "creator";
   "close" if "admin";
 }
-
-test "issue creator can update and close issues" {
-  setup {
-    has_relation(Issue{"537"}, "repository", Repository{"anvil"});
-    has_relation(Issue{"42"}, "repository", Repository{"anvil"});
-    has_relation(Issue{"537"}, "creator", User{"alice"});
-  }
-
-  assert allow(User{"alice"}, "close", Issue{"537"});
-  assert allow(User{"alice"}, "update", Issue{"537"});
-  assert_not allow(User{"alice"}, "close", Issue{"42"});
-}
-
-test "repository maintainers can close issues" {
-  setup {
-    has_relation(Issue{"537"}, "repository", Repository{"anvil"});
-    has_relation(Issue{"42"}, "repository", Repository{"anvil"});
-    has_relation(Issue{"537"}, "creator", User{"alice"});
-    has_role(User{"bob"}, "maintainer", Repository{"anvil"});
-  }
-  assert allow(User{"bob"}, "close", Issue{"537"});
-  assert_not allow(User{"bob"}, "update", Issue{"537"});
-  assert allow(User{"bob"}, "close", Issue{"42"});
-}
-    `
+    `,
+    authorizeQuery: 'User:alice close Issue:537',
+    contextFacts: [
+      ['has_relation', { type: 'Issue', id: '537' }, 'repository', { type: 'Repository', id: 'anvil' }],
+      ['has_relation', { type: 'Issue', id: '537' }, 'creator', { type: 'User', id: 'alice' }],
+      ['has_role', { type: 'User', id: 'bob' }, 'maintainer', { type: 'Repository', id: 'anvil' }]
+    ]
   },
 
 
@@ -802,18 +651,14 @@ resource File {
   "read" if "reader";
   "write" if "writer";
 }
-
-test "folder roles apply to files" {
-  setup {
-    has_role(User{"alice"}, "reader", Repository{"anvil"});
-    has_relation(Folder{"python"}, "repository", Repository{"anvil"});
-    has_relation(Folder{"tests"}, "folder", Folder{"python"});
-    has_relation(File{"test.py"}, "folder", Folder{"tests"});
-  }
-
-  assert allow(User{"alice"}, "read", File{"test.py"});
-}
-      `
+    `,
+    authorizeQuery: 'User:alice read File:test.py',
+    contextFacts: [
+      ['has_role', { type: 'User', id: 'alice' }, 'reader', { type: 'Repository', id: 'anvil' }],
+      ['has_relation', { type: 'Folder', id: 'python' }, 'repository', { type: 'Repository', id: 'anvil' }],
+      ['has_relation', { type: 'Folder', id: 'tests' }, 'folder', { type: 'Folder', id: 'python' }],
+      ['has_relation', { type: 'File', id: 'test.py' }, 'folder', { type: 'Folder', id: 'tests' }]
+    ]
   },
 
 
@@ -874,22 +719,13 @@ allow(user: User, action: String, resource: Resource) if
 # Default allow rule since we added our own custom one
 allow(user: User, action: String, resource: Resource) if
   has_permission(user, action, resource);
-
-test "support users can read organizations via impersonation" {
-  setup {
-    has_role(User{"alice"}, "support");
-    has_role(User{"bob"}, "admin", Organization{"acme"});
-    has_role(User{"charlie"}, "member", Organization{"bar"});
-    is_impersonating(User{"alice"}, User{"bob"});
-  }
-
-  assert allow(User{"bob"}, "read", Organization{"acme"});
-  assert allow(User{"alice"}, "impersonate", User{"bob"});
-  assert allow(User{"alice"}, "read", Organization{"acme"});
-  assert allow(User{"charlie"}, "read", Organization{"bar"});
-  assert_not allow(User{"alice"}, "read", Organization{"bar"});
-}
-      `
+`,
+    authorizeQuery: 'User:alice read Organization:acme',
+    contextFacts: [
+      ['has_role', { type: 'User', id: 'alice' }, 'support'],
+      ['has_role', { type: 'User', id: 'bob' }, 'admin', { type: 'Organization', id: 'acme' }],
+      ['is_impersonating', { type: 'User', id: 'alice' }, { type: 'User', id: 'bob' }]
+    ]
   },
 
 
@@ -932,23 +768,14 @@ resource Repository {
   "viewer" if "manager" on "creator";
   "read" if "viewer";
 }
-
-test "manager can have viewer role on employees repos" {
-  setup {
-    has_relation(Repository{"acme"}, "creator", User{"alice"});
-    has_relation(User{"alice"}, "direct_manager", User{"bhav"});
-    has_relation(User{"bhav"}, "direct_manager", User{"crystal"});
-    # fergie not in alice's direct hierarchy
-    has_relation(User{"fergie"}, "direct_manager", User{"crystal"});
-  }
-
-  assert allow(User{"alice"}, "read", Repository{"acme"});
-  assert allow(User{"bhav"}, "read", Repository{"acme"});
-  assert allow(User{"crystal"}, "read", Repository{"acme"});
-  # fergie not in alice's direct hierarchy, so cannot read
-  assert_not allow(User{"fergie"}, "read", Repository{"acme"});
-}
-    `
+    `,
+    authorizeQuery: 'User:bhav read Repository:acme',
+    contextFacts: [
+      ['has_relation', { type: 'Repository', id: 'acme' }, 'creator', { type: 'User', id: 'alice' }],
+      ['has_relation', { type: 'User', id: 'alice' }, 'direct_manager', { type: 'User', id: 'bhav' }],
+      ['has_relation', { type: 'User', id: 'bhav' }, 'direct_manager', { type: 'User', id: 'crystal' }],
+      ['has_relation', { type: 'User', id: 'fergie' }, 'direct_manager', { type: 'User', id: 'crystal' }]
+    ]
   },
 
 
@@ -985,15 +812,11 @@ resource Repository {
 
   "read" if is_public(resource);
 }
-
-test "public repositories" {
-  setup {
-    is_public(Repository{"anvil"});
-  }
-
-  assert allow(User{"alice"}, "read", Repository{"anvil"});
-}
-    `
+    `,
+    authorizeQuery: 'User:alice read Repository:anvil',
+    contextFacts: [
+      ['is_public', { type: 'Repository', id: 'anvil' }]
+    ]
   },
 
 
@@ -1038,18 +861,13 @@ has_role(actor: Actor, role: String, repo: Repository) if
   has_relation(repo, "organization", org) and
   has_default_role(org, role) and
   has_role(actor, "member", org);
-
-test "default org role grants permission to org members" {
-  setup {
-    has_default_role(Organization{"acme"}, "editor");
-    has_role(User{"alice"}, "member", Organization{"acme"});
-    has_relation(Repository{"anvil"}, "organization", Organization{"acme"});
-  }
-
-  assert has_role(User{"alice"}, "editor", Repository{"anvil"});
-  assert allow(User{"alice"}, "write", Repository{"anvil"});
-}
-    `
+    `,
+    authorizeQuery: 'User:alice write Repository:anvil',
+    contextFacts: [
+      ['has_default_role', { type: 'Organization', id: 'acme' }, 'editor'],
+      ['has_role', { type: 'User', id: 'alice' }, 'member', { type: 'Organization', id: 'acme' }],
+      ['has_relation', { type: 'Repository', id: 'anvil' }, 'organization', { type: 'Organization', id: 'acme' }]
+    ]
   },
 
 
@@ -1097,20 +915,16 @@ has_role(actor: Actor, role: String, repository: Repository) if
   org matches Organization and
   has_relation(repository, "organization", org) and
   has_role(actor, role, org);
-
-test "protected repositories override org-level access" {
-  setup {
-    has_role(User{"alice"}, "member", Organization{"acme"});
-    has_relation(Repository{"anvil"}, "organization", Organization{"acme"});
-    has_relation(Repository{"website"}, "organization", Organization{"acme"});
-    is_protected(Repository{"anvil"});
-  }
-
-  assert_not allow(User{"alice"}, "read", Repository{"anvil"});
-  assert allow(User{"alice"}, "read", Repository{"website"});
-}
-      `
+      `,
+    authorizeQuery: 'User:alice read Repository:website',
+    contextFacts: [
+      ['has_role', { type: 'User', id: 'alice' }, 'member', { type: 'Organization', id: 'acme' }],
+      ['has_relation', { type: 'Repository', id: 'anvil' }, 'organization', { type: 'Organization', id: 'acme' }],
+      ['has_relation', { type: 'Repository', id: 'website' }, 'organization', { type: 'Organization', id: 'acme' }],
+      ['is_protected', { type: 'Repository', id: 'anvil' }]
+    ]
   },
+
 
   {
     title: 'Time-Based Checks',
@@ -1144,19 +958,12 @@ has_role(actor: Actor, role: String, repo: Repository) if
   expiration matches Integer and
   has_role_with_expiry(actor, role, repo, expiration) and
   expiration > @current_unix_time;
-
-test "access to repositories is conditional on expiry" {
-  setup {
-    # Alice's access expires in 2033
-    has_role_with_expiry(User{"alice"}, "member", Repository{"anvil"}, 2002913298);
-    # Bob's access expired in 2022
-    has_role_with_expiry(User{"bob"}, "member", Repository{"anvil"}, 1655758135);
-  }
-
-  assert allow(User{"alice"}, "read", Repository{"anvil"});
-  assert_not allow(User{"bob"}, "read", Repository{"anvil"});
-}
-      `
+      `,
+    authorizeQuery: 'User:alice read Repository:anvil',
+    contextFacts: [
+      ['has_role_with_expiry', { type: 'User', id: 'alice' }, 'member', { type: 'Repository', id: 'anvil' }, 2002913298],
+      ['has_role_with_expiry', { type: 'User', id: 'bob' }, 'member', { type: 'Repository', id: 'anvil' }, 1655758135]
+    ]
   },
 
   {
@@ -1216,29 +1023,13 @@ has_quota(org: Organization, feature: Feature, quota: Integer) if
 
 plan_quota(Plan{"pro"}, Feature{"repository"}, 10);
 plan_quota(Plan{"basic"}, Feature{"repository"}, 0);
-
-test "members can create repositories if they have quota" {
-  setup {
-    quota_used(Organization{"apple"}, Feature{"repository"}, 5);
-    quota_used(Organization{"netflix"}, Feature{"repository"}, 10);
-    quota_used(Organization{"amazon"}, Feature{"repository"}, 0);
-    has_relation(Plan{"pro"}, "subscribed", Organization{"apple"});
-    has_relation(Plan{"pro"}, "subscribed", Organization{"netflix"});
-    has_relation(Plan{"basic"}, "subscribed", Organization{"amazon"});
-    has_role(User{"alice"}, "member", Organization{"apple"});
-    has_role(User{"bob"}, "member", Organization{"netflix"});
-    has_role(User{"charlie"}, "member", Organization{"amazon"});
-  }
-
-  assert has_quota_remaining(Organization{"apple"}, Feature{"repository"});
-  # Apple has quota remaining, so all good
-  assert allow(User{"alice"}, "repository.create", Organization{"apple"});
-  # Netflix has used all quota
-  assert_not allow(User{"bob"}, "repository.create", Organization{"netflix"});
-  # Amazon doesn't have any quota left
-  assert_not allow(User{"charlie"}, "repository.create", Organization{"amazon"});
-}
-      `
+`,
+    authorizeQuery: 'User:alice repository.create Organization:apple',
+    contextFacts: [
+      ['quota_used', { type: 'Organization', id: 'apple' }, { type: 'Feature', id: 'repository' }, 5],
+      ['has_relation', { type: 'Plan', id: 'pro' }, 'subscribed', { type: 'Organization', id: 'apple' }],
+      ['has_role', { type: 'User', id: 'alice' }, 'member', { type: 'Organization', id: 'apple' }]
+    ]
   },
 
 
@@ -1288,22 +1079,12 @@ resource Repository {
   # ownership grants all permissions
   "contributor" if "owner";
 }
-
-test "recap example" {
-  setup {
-    has_relation(Repository{"example"}, "owner", User{"alice"});
-    has_role(User{"bob"}, "reader", Repository{"example"});
-  }
-
-  # owners have full access
-  assert allow(User{"alice"}, "read", Repository{"example"});
-  assert allow(User{"alice"}, "write", Repository{"example"});
-
-  # readers have read-only access
-  assert allow(User{"bob"}, "read", Repository{"example"});
-  assert_not allow(User{"bob"}, "write", Repository{"example"});
-}
-    `
+    `,
+    authorizeQuery: 'User:alice read Repository:example',
+    contextFacts: [
+      ['has_relation', { type: 'Repository', id: 'example' }, 'owner', { type: 'User', id: 'alice' }],
+      ['has_role', { type: 'User', id: 'bob' }, 'reader', { type: 'Repository', id: 'example' }]
+    ]
   }
 ].reduce((res, section) => {
   let chapterSections = section.chapter;

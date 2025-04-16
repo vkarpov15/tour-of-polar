@@ -48,7 +48,7 @@ export default async function exec(req, res) {
         throw new Error('Each context fact must have at least one element');
       }
       for (const param of fact) {
-        if (typeof param !== 'string' && (!param || typeof param.type !== 'string' || typeof param.id !== 'string')) {
+        if (typeof param !== 'string' && typeof param !== 'number' && (!param || typeof param.type !== 'string' || typeof param.id !== 'string')) {
           throw new Error('Each context fact parameter must be either a string or an object with string type and id');
         }
       }

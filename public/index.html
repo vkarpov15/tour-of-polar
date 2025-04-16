@@ -56,7 +56,6 @@
   <script src="https://unpkg.com/codemirror@5.65.16/lib/codemirror.js"></script>
   <script src="https://unpkg.com/codemirror@5.65.16/mode/ruby/ruby.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/theme/monokai.css">
-  <link rel="stylesheet" href="https://unpkg.com/codemirror@5.65.16/theme/idea.css">
 
   <style>
     .CodeMirror { height: 100%; }
@@ -66,6 +65,11 @@
     }
 
     #drag-bar-vert {
+      padding: 2px;
+      cursor: col-resize;
+    }
+
+    #drag-bar-policy {
       padding: 2px;
       cursor: col-resize;
     }
@@ -112,10 +116,30 @@
       </div>
       <div id="drag-bar-vert" class="bg-gray-300 dark:bg-gray-700"></div>
       <div class="w-1/2 flex flex-col h-[calc(100vh-48px)] overflow-hidden">
-        <div id="editor" class="h-1/2"></div>
+        <div id="editorWrapper" class="h-1/2 flex relative bg-[#f7f7f7] dark:bg-[#272822]">
+          <div class="absolute left-2 top-1 font-bold">Policy</div>
+          <div id="editor" class="h-full w-1/2 pt-8"></div>
+          <div id="drag-bar-policy" class="bg-gray-300 dark:bg-gray-700"></div>
+          <div id="facts" class="h-full w-1/2 flex flex-col bg-white dark:bg-gray-900">
+            <h2 class="font-bold bg-[#f7f7f7] dark:bg-[#272822] h-8 px-2 pt-1">Facts</h2>
+            <div class="flex gap-2 mt-2 px-2">
+              <input id="factInput" type="text" class="flex-grow border border-gray-300 rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter fact">
+              <button onclick="addFact()" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 dark:bg-indigo-800 dark:hover:bg-indigo-700">Add</button>
+            </div>
+            <div id="factList" class="mt-4 flex flex-col gap-2 px-2"></div>
+          </div>
+        </div>
         <div id="drag-bar" class="bg-gray-300 dark:bg-gray-700"></div>
         <div class="w-full h-1/2">
-          <div class="w-full bg-gray-100 p-3 flex justify-between dark:bg-gray-800">
+          <div class="w-full bg-gray-100 p-3 flex items-center gap-2 dark:bg-gray-800">
+            <div class="text-sm text-gray-700 dark:text-gray-400">
+              Authorize:
+            </div>
+            <input
+              id="authorizeQuery"
+              type="text"
+              value='User:alice "read" Organization:acme'
+              class="border flex-grow border-gray-300 rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono" placeholder="User:alice read Organization:acme">
             <button id="runButton" onclick="runCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-slate-500 dark:bg-indigo-800 dark:hover:bg-indigo-700">Run</button>
           </div>
           <pre id="results" class="p-4 h-[calc(100%-64px)] overflow-y-auto relative dark:text-gray-300">
@@ -131,6 +155,78 @@
 let currentChapter = Object.keys(content)[0];
 let currentPage = 0;
 
+let contextFacts = [];
+
+function addFact() {
+  const input = document.getElementById('factInput');
+  const fact = input.value.trim();
+  if (fact) {
+    const parsedFact = parseFactOrQuery(fact);
+    const errorDiv = document.getElementById('factError');
+    const factList = document.getElementById('factList');
+
+    if (parsedFact.length < 2) {
+      if (!errorDiv) {
+        const error = document.createElement('div');
+        error.id = 'factError';
+        error.className = 'text-red-500 text-sm mt-1 ml-2';
+        error.textContent = 'Facts must have at least 1 parameter';
+        factList.parentNode.insertBefore(error, factList);
+      }
+      return;
+    }
+
+    if (errorDiv) {
+      errorDiv.remove();
+    }
+
+    contextFacts.push(parsedFact);
+    input.value = '';
+    updateFactList();
+  }
+}
+
+function removeFact(index) {
+  contextFacts.splice(index, 1);
+  updateFactList();
+}
+
+function parseFactOrQuery(factStr) {
+  return factStr.trim().split(/\s+/).map(token => {
+    // If starts and ends with quotes, treat as literal string, e.g. `"prod:admin"` as a
+    // literal string rather than `{ type: 'prod', id: 'admin' }`
+    if (token.startsWith('"') && token.endsWith('"')) {
+      return token.slice(1, -1);
+    }
+    // If token is all digits, treat as a number
+    if (/^\d+$/.test(token)) {
+      return parseInt(token);
+    }
+    if (token.indexOf(':') !== -1) {
+      const [type, id] = [
+        token.slice(0, token.indexOf(':')),
+        token.slice(token.indexOf(':') + 1).replace(/^"/, '').replace(/"$/, '')
+      ];
+      return { type, id };
+    }
+    return token;
+  });
+}
+
+function stringifyFact(fact) {
+  return fact.map(param => typeof param === 'string' || typeof param === 'number' ? param : `${param.type}:${param.id}`).join(' ');
+}
+
+function updateFactList() {
+  const factList = document.getElementById('factList');
+  factList.innerHTML = contextFacts.map((fact, i) => `
+    <div class="flex gap-2 items-center">
+      <div class="flex-grow font-mono text-sm">${stringifyFact(fact)}</div>
+      <button onclick="removeFact(${i})" class="text-red-500 hover:text-red-700">&times;</button>
+    </div>
+  `).join('');
+}
+
 function previousPage() {
   if (currentPage > 0) {
     currentPage--;
@@ -140,6 +236,9 @@ function previousPage() {
   } else {
     return;
   }
+  contextFacts = [];
+  document.getElementById('factInput').value = '';
+  updateFactList();
   updatePage(true);
 
   track('PREVIOUS_PAGE', { currentChapter, currentPage });
@@ -154,6 +253,9 @@ function nextPage() {
   } else {
     return;
   }
+  contextFacts = [];
+  document.getElementById('factInput').value = '';
+  updateFactList();
   updatePage(true);
 
   track('NEXT_PAGE', { currentChapter, currentPage });
@@ -164,6 +266,7 @@ function updatePage(pushState) {
   cm.setValue(page.code.trim());
   document.getElementById('pageContent').innerHTML = page.text;
   document.getElementById('results').innerHTML = '<img src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6793da36f7a5080d73228681_File%20Sharing%20Bear.png" class="absolute bottom-0 h-48 left-1/2 -translate-x-1/2">';
+
   updatePageDisplay();
   const chapterSlug = chapterSlugs[currentChapter];
   if (pushState) {
@@ -188,23 +291,40 @@ function updatePageDisplay() {
   results.classList.remove('border-2');
   results.classList.remove('border-green-500');
   results.classList.remove('border-red-500');
+
+  const page = content[currentChapter][currentPage];
+  if (page.authorizeQuery) {
+    document.getElementById('authorizeQuery').value = page.authorizeQuery;
+  } else {
+    document.getElementById('authorizeQuery').value = '';
+  }
+  if (page.contextFacts) {
+    contextFacts = page.contextFacts;
+    updateFactList();
+  }
 }
 
 async function runCode() {
   const runButton = document.getElementById('runButton');
   runButton.disabled = true;
   const code = cm.getValue();
+  const authorizeQuery = parseFactOrQuery(document.getElementById('authorizeQuery').value);
   const results = document.getElementById('results');
   let success = null;
   let error = null;
   try {
     results.innerHTML = '<div class="animate-spin h-5 w-5 border-2 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>';
+
     const response = await fetch(`${__BASE_PATH__}/api/exec`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ code })
+      body: JSON.stringify({
+        code,
+        authorizeQuery,
+        contextFacts
+      })
     });
     const result = await response.json();
     let displayResult = '';
@@ -223,15 +343,25 @@ async function runCode() {
     } else {
       displayResult += `
         <div class="flex flex-col items-center">
-          <div>Policy executed successfully</div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-500 mt-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
+          <div>Result: ${result.authorizeResult ? 'Allowed' : 'Denied'}</div>
+          ${result.authorizeResult ?
+            `<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-500 mt-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>` :
+            `<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500 mt-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>`
+          }
         </div>
       `;
       results.classList.add('border-2');
-      results.classList.remove('border-red-500');
-      results.classList.add('border-green-500');
+      if (result.authorizeResult) {
+        results.classList.remove('border-red-500');
+        results.classList.add('border-green-500');
+      } else {
+        results.classList.remove('border-green-500');
+        results.classList.add('border-red-500');
+      }
       success = true;
     }
     displayResult += '</div>';
@@ -252,7 +382,7 @@ async function runCode() {
 }
 
 // Get chapter and page from URL
-const path = window.location.pathname.slice(0, __BASE_PATH__.length);
+const path = window.location.pathname.slice(__BASE_PATH__.length);
 if (path !== '/') {
   const [, chapterSlug, pageNum] = path.split('/');
   const chapter = Object.keys(content).find(c => chapterSlugs[c] === chapterSlug);
@@ -283,7 +413,7 @@ const cm = CodeMirror(document.getElementById("editor"), {
   tabSize: 2,
   autofocus: true,
   mode: "ruby",
-  theme: document.documentElement.classList.contains('dark') ? 'monokai' : 'idea',
+  theme: document.documentElement.classList.contains('dark') ? 'monokai' : 'default',
   extraKeys: {
     "Shift-Enter": function(cm) {
       runCode();
@@ -298,7 +428,7 @@ if (localStorage.getItem('darkMode') === 'true' ||
   cm.setOption('theme', 'monokai');
 } else {
   document.documentElement.classList.remove('dark');
-  cm.setOption('theme', 'idea');
+  cm.setOption('theme', 'default');
 }
 
 window.addEventListener('popstate', () => {
@@ -332,6 +462,7 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
   // Vertical drag bar
   const dragBar = document.getElementById('drag-bar');
+  const editorWrapperDiv = document.getElementById('editorWrapper');
   const editorDiv = document.getElementById('editor');
   const resultsDiv = document.getElementById('results').parentElement;
   let isDragging = false;
@@ -342,14 +473,14 @@ window.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     isDragging = true;
     initialMouseY = e.clientY || e.pageY;
-    initialEditorHeight = editorDiv.offsetHeight;
+    initialEditorHeight = editorWrapperDiv.offsetHeight;
   });
 
   document.addEventListener('mousemove', (e) => {
     if (isDragging) {
       const mouseY = e.clientY || e.pageY;
-      const containerTop = editorDiv.parentElement.offsetTop;
-      const containerHeight = editorDiv.parentElement.offsetHeight;
+      const containerTop = editorWrapperDiv.parentElement.offsetTop;
+      const containerHeight = editorWrapperDiv.parentElement.offsetHeight;
 
       const mouseMovementY = mouseY - initialMouseY;
       const newEditorHeight = Math.max(initialEditorHeight + mouseMovementY, 0);
@@ -357,7 +488,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const editorHeight = (newEditorHeight / containerHeight) * 100;
       const resultsHeight = 100 - editorHeight;
 
-      editorDiv.style.height = `${editorHeight}%`;
+      editorWrapperDiv.style.height = `${editorHeight}%`;
       resultsDiv.style.height = `${resultsHeight}%`;
       cm.refresh();
     }
@@ -367,7 +498,7 @@ window.addEventListener('DOMContentLoaded', () => {
     isDragging = false;
   });
 
-  // Horizontal drag bar
+  // Horizontal drag bar between main panels
   const dragBarVert = document.getElementById('drag-bar-vert');
   const leftPanel = dragBarVert.previousElementSibling;
   const rightPanel = dragBarVert.nextElementSibling;
@@ -402,14 +533,64 @@ window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('mouseup', () => {
     isDraggingVert = false;
   });
+
+  // Horizontal drag bar between Policy and Facts
+  const dragBarPolicy = document.getElementById('drag-bar-policy');
+  const policyPanel = dragBarPolicy.previousElementSibling;
+  const factsPanel = dragBarPolicy.nextElementSibling;
+  let isDraggingPolicy = false;
+  let initialPolicyMouseX = 0;
+  let initialPolicyWidth = 0;
+
+  dragBarPolicy.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    isDraggingPolicy = true;
+    initialPolicyMouseX = e.clientX || e.pageX;
+    initialPolicyWidth = policyPanel.offsetWidth;
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDraggingPolicy) {
+      const mouseX = e.clientX || e.pageX;
+      const containerWidth = policyPanel.parentElement.offsetWidth;
+
+      const mouseMovementX = mouseX - initialPolicyMouseX;
+      const newPolicyWidth = Math.max(initialPolicyWidth + mouseMovementX, 0);
+
+      const policyWidth = (newPolicyWidth / containerWidth) * 100;
+      const factsWidth = 100 - policyWidth;
+
+      policyPanel.style.width = `${policyWidth}%`;
+      factsPanel.style.width = `${factsWidth}%`;
+      cm.refresh();
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDraggingPolicy = false;
+  });
 });
 
 function toggleDarkMode() {
   document.documentElement.classList.toggle('dark');
   localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-  cm.setOption('theme', document.documentElement.classList.contains('dark') ? 'monokai' : 'idea');
+  cm.setOption('theme', document.documentElement.classList.contains('dark') ? 'monokai' : 'default');
   track('TOGGLE_DARK_MODE', { darkMode: document.documentElement.classList.contains('dark') });
 }
+
+// Add event listener for Enter key in authorize input
+document.getElementById('authorizeQuery').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    runCode();
+  }
+});
+
+// Add event listener for Enter key in facts input
+document.getElementById('factInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    addFact();
+  }
+});
 
 function track(type, data = {}) {
   const sessionId = sessionStorage.getItem('sessionId') ||

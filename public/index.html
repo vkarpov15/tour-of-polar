@@ -68,6 +68,11 @@
       padding: 2px;
       cursor: col-resize;
     }
+
+    #drag-bar-policy {
+      padding: 2px;
+      cursor: col-resize;
+    }
   </style>
 </head>
 
@@ -113,7 +118,8 @@
       <div class="w-1/2 flex flex-col h-[calc(100vh-48px)] overflow-hidden">
         <div id="editorWrapper" class="h-1/2 flex relative bg-[#f7f7f7] dark:bg-[#272822]">
           <div class="absolute left-2 top-1 font-bold">Policy</div>
-          <div id="editor" class="h-full w-1/2 border-r border-gray-700 pt-8"></div>
+          <div id="editor" class="h-full w-1/2 pt-8"></div>
+          <div id="drag-bar-policy" class="bg-gray-300 dark:bg-gray-700"></div>
           <div id="facts" class="h-full w-1/2 flex flex-col bg-white dark:bg-gray-900">
             <h2 class="font-bold bg-[#f7f7f7] dark:bg-[#272822] h-8 px-2 pt-1">Facts</h2>
             <div class="flex gap-2 mt-2 px-2">
@@ -184,6 +190,9 @@ function previousPage() {
   } else {
     return;
   }
+  contextFacts = [];
+  document.getElementById('factInput').value = '';
+  updateFactList();
   updatePage(true);
 
   track('PREVIOUS_PAGE', { currentChapter, currentPage });
@@ -198,6 +207,9 @@ function nextPage() {
   } else {
     return;
   }
+  contextFacts = [];
+  document.getElementById('factInput').value = '';
+  updateFactList();
   updatePage(true);
 
   track('NEXT_PAGE', { currentChapter, currentPage });
@@ -312,7 +324,7 @@ async function runCode() {
 }
 
 // Get chapter and page from URL
-const path = window.location.pathname.slice(0, __BASE_PATH__.length);
+const path = window.location.pathname.slice(__BASE_PATH__.length);
 if (path !== '/') {
   const [, chapterSlug, pageNum] = path.split('/');
   const chapter = Object.keys(content).find(c => chapterSlugs[c] === chapterSlug);
@@ -428,7 +440,7 @@ window.addEventListener('DOMContentLoaded', () => {
     isDragging = false;
   });
 
-  // Horizontal drag bar
+  // Horizontal drag bar between main panels
   const dragBarVert = document.getElementById('drag-bar-vert');
   const leftPanel = dragBarVert.previousElementSibling;
   const rightPanel = dragBarVert.nextElementSibling;
@@ -463,6 +475,42 @@ window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('mouseup', () => {
     isDraggingVert = false;
   });
+
+  // Horizontal drag bar between Policy and Facts
+  const dragBarPolicy = document.getElementById('drag-bar-policy');
+  const policyPanel = dragBarPolicy.previousElementSibling;
+  const factsPanel = dragBarPolicy.nextElementSibling;
+  let isDraggingPolicy = false;
+  let initialPolicyMouseX = 0;
+  let initialPolicyWidth = 0;
+
+  dragBarPolicy.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    isDraggingPolicy = true;
+    initialPolicyMouseX = e.clientX || e.pageX;
+    initialPolicyWidth = policyPanel.offsetWidth;
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDraggingPolicy) {
+      const mouseX = e.clientX || e.pageX;
+      const containerWidth = policyPanel.parentElement.offsetWidth;
+
+      const mouseMovementX = mouseX - initialPolicyMouseX;
+      const newPolicyWidth = Math.max(initialPolicyWidth + mouseMovementX, 0);
+
+      const policyWidth = (newPolicyWidth / containerWidth) * 100;
+      const factsWidth = 100 - policyWidth;
+
+      policyPanel.style.width = `${policyWidth}%`;
+      factsPanel.style.width = `${factsWidth}%`;
+      cm.refresh();
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDraggingPolicy = false;
+  });
 });
 
 function toggleDarkMode() {
@@ -471,6 +519,20 @@ function toggleDarkMode() {
   cm.setOption('theme', document.documentElement.classList.contains('dark') ? 'monokai' : 'default');
   track('TOGGLE_DARK_MODE', { darkMode: document.documentElement.classList.contains('dark') });
 }
+
+// Add event listener for Enter key in authorize input
+document.getElementById('authorizeQuery').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    runCode();
+  }
+});
+
+// Add event listener for Enter key in facts input
+document.getElementById('factInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    addFact();
+  }
+});
 
 function track(type, data = {}) {
   const sessionId = sessionStorage.getItem('sessionId') ||

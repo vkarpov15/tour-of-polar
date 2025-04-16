@@ -154,13 +154,33 @@
 <script>
 let currentChapter = Object.keys(content)[0];
 let currentPage = 0;
+
 let contextFacts = [];
 
 function addFact() {
   const input = document.getElementById('factInput');
   const fact = input.value.trim();
   if (fact) {
-    contextFacts.push(fact);
+    const parsedFact = parseFactOrQuery(fact);
+    const errorDiv = document.getElementById('factError');
+    const factList = document.getElementById('factList');
+
+    if (parsedFact.length < 2) {
+      if (!errorDiv) {
+        const error = document.createElement('div');
+        error.id = 'factError';
+        error.className = 'text-red-500 text-sm mt-1 ml-2';
+        error.textContent = 'Facts must have at least 1 parameter';
+        factList.parentNode.insertBefore(error, factList);
+      }
+      return;
+    }
+
+    if (errorDiv) {
+      errorDiv.remove();
+    }
+
+    contextFacts.push(parsedFact);
     input.value = '';
     updateFactList();
   }
@@ -171,11 +191,33 @@ function removeFact(index) {
   updateFactList();
 }
 
+function parseFactOrQuery(factStr) {
+  return factStr.trim().split(/\s+/).map(token => {
+    // If starts and ends with quotes, treat as literal string, e.g. `"prod:admin"` as a
+    // literal string rather than `{ type: 'prod', id: 'admin' }`
+    if (token.startsWith('"') && token.endsWith('"')) {
+      return token.slice(1, -1);
+    }
+    if (token.indexOf(':') !== -1) {
+      const [type, id] = [
+        token.slice(0, token.indexOf(':')),
+        token.slice(token.indexOf(':') + 1).replace(/^"/, '').replace(/"$/, '')
+      ];
+      return { type, id };
+    }
+    return token;
+  });
+}
+
+function stringifyFact(fact) {
+  return fact.map(param => typeof param === 'string' ? param : `${param.type}:${param.id}`).join(' ');
+}
+
 function updateFactList() {
   const factList = document.getElementById('factList');
   factList.innerHTML = contextFacts.map((fact, i) => `
     <div class="flex gap-2 items-center">
-      <div class="flex-grow font-mono text-sm">${fact}</div>
+      <div class="flex-grow font-mono text-sm">${stringifyFact(fact)}</div>
       <button onclick="removeFact(${i})" class="text-red-500 hover:text-red-700">&times;</button>
     </div>
   `).join('');
@@ -250,7 +292,7 @@ async function runCode() {
   const runButton = document.getElementById('runButton');
   runButton.disabled = true;
   const code = cm.getValue();
-  const authorizeQuery = document.getElementById('authorizeQuery').value;
+  const authorizeQuery = parseFactOrQuery(document.getElementById('authorizeQuery').value);
   const results = document.getElementById('results');
   let success = null;
   let error = null;

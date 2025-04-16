@@ -21,6 +21,39 @@ export default async function exec(req, res) {
       throw new Error('Code must be a string');
     }
 
+    if (!Array.isArray(authorizeQuery)) {
+      throw new Error('Authorize query must be an array');
+    }
+    if (authorizeQuery.length !== 3) {
+      throw new Error('Authorize query must have 3 elements');
+    }
+    if (!authorizeQuery[0] || typeof authorizeQuery[0].type !== 'string' || typeof authorizeQuery[0].id !== 'string') {
+      throw new Error('Authorize query actor must be an object with string type and id');
+    }
+    if (typeof authorizeQuery[1] !== 'string') {
+      throw new Error('Authorize query action must be a string');
+    }
+    if (!authorizeQuery[2] || typeof authorizeQuery[2].type !== 'string' || typeof authorizeQuery[2].id !== 'string') {
+      throw new Error('Authorize query resource must be an object with string type and id');
+    }
+
+    if (!Array.isArray(contextFacts)) {
+      throw new Error('Context facts must be an array');
+    }
+    for (const fact of contextFacts) {
+      if (!Array.isArray(fact)) {
+        throw new Error('Each context fact must be an array');
+      }
+      if (!fact.length) {
+        throw new Error('Each context fact must have at least one element');
+      }
+      for (const param of fact) {
+        if (typeof param !== 'string' && (!param || typeof param.type !== 'string' || typeof param.id !== 'string')) {
+          throw new Error('Each context fact parameter must be either a string or an object with string type and id');
+        }
+      }
+    }
+
     if (!oso) {
       await configureDevServer();
       const { url, apiKey } = await getEphemeralOsoKey();
@@ -29,8 +62,8 @@ export default async function exec(req, res) {
 
     await oso.policy(code);
 
-    console.log(...parseAuthorizeQuery(authorizeQuery), contextFacts.map(factStr => parseFact(factStr)));
-    const authorizeResult = authorizeQuery ? await oso.authorize(...parseAuthorizeQuery(authorizeQuery), contextFacts.map(factStr => parseFact(factStr))) : null;
+    console.log(authorizeQuery, contextFacts);
+    const authorizeResult = authorizeQuery ? await oso.authorize(...authorizeQuery, contextFacts) : null;
 
     res.status(200).json({ authorizeResult });
   } catch (err) {
@@ -39,60 +72,4 @@ export default async function exec(req, res) {
       error: err.message
     });
   }
-}
-
-function parseFact(factStr) {
-  return factStr.trim().split(/\s+/).map(token => {
-    if (token.indexOf(':') !== -1) {
-      const [type, id] = [token.slice(0, token.indexOf(':')), token.slice(token.indexOf(':') + 1)].map(tok => tok.replace(/^"/, '').replace(/"$/, ''));
-      return { type, id };
-    }
-    return token.replace(/^"/, '').replace(/"$/, '');
-  });
-}
-
-function parseAuthorizeQuery(authorizeString) {
-  let parts = authorizeString.trim().split(/\s+/);
-  if (parts.length !== 3) {
-    throw new Error("There was an error parsing this query.");
-  }
-  let actor = extractLegacyTypedId(parts[0]);
-  let action = extractLegacyTypedId(parts[1]);
-  let resource = extractLegacyTypedId(parts[2]);
-
-  if (actor.id.length === 0) {
-    throw new Error(`Actor ID must be set: ${actor.type}:<id>`);
-  }
-  if (action.type !== "String") {
-    throw new Error(`Action ${parts[1]} must be of type String.`);
-  }
-  if (action.id.length === 0) {
-    throw new Error("Action cannot be empty");
-  }
-  if (resource.id.length === 0) {
-    throw new Error(`Resource ID must be set: ${resource.type}:<id>`);
-  }
-
-  return [actor, action.id, resource];
-}
-
-function extractLegacyTypedId(token) {
-  // pass quoted terms as String types
-  const matches = removeSurroundingQuotes(token);
-  if (matches) {
-    return { type: "String", id: matches.replaceAll('"', "") };
-  }
-
-  const [first, ...rest] = token.split(":");
-
-  if (rest.length > 0) {
-    return { type: first, id: rest.join(":") };
-  } else {
-    return { type: "String", id: first.replaceAll('"', "") };
-  }
-}
-
-function removeSurroundingQuotes(s) {
-  const matches = s.match(/^"(.+)"$/);
-  return matches ? matches[1] : null;
 }

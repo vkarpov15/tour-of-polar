@@ -132,17 +132,16 @@
         <div id="drag-bar" class="bg-gray-300 dark:bg-gray-700"></div>
         <div class="w-full h-1/2">
           <div class="w-full bg-gray-100 p-3 flex items-center gap-2 dark:bg-gray-800">
-            <div class="text-sm text-gray-700 dark:text-gray-400">
-              Authorize:
-            </div>
             <input
               id="authorizeQuery"
               type="text"
               value='User:alice "read" Organization:acme'
               class="border flex-grow border-gray-300 rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono" placeholder="User:alice read Organization:acme">
-            <button id="runButton" onclick="runCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-slate-500 dark:bg-indigo-800 dark:hover:bg-indigo-700">Run</button>
+            <button id="runButton" onclick="runCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md disabled:bg-slate-500 dark:bg-indigo-800 dark:hover:bg-indigo-700">
+              Authorize
+            </button>
           </div>
-          <pre id="results" class="p-4 h-[calc(100%-64px)] overflow-y-auto relative dark:text-gray-300">
+          <pre id="results" class="p-4 h-[calc(100%-66px)] overflow-y-auto relative dark:text-gray-300 mr-[1px]">
             <img src="https://cdn.prod.website-files.com/5f1483105c9a72fd0a3b662a/6793da36f7a5080d73228681_File%20Sharing%20Bear.png" class="absolute bottom-0 h-48 left-1/2 -translate-x-1/2">
           </pre>
         </div>
@@ -345,10 +344,10 @@ async function runCode() {
         <div class="flex flex-col items-center">
           <div>Result: ${result.authorizeResult ? 'Allowed' : 'Denied'}</div>
           ${result.authorizeResult ?
-            `<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-500 mt-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            `<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mt-4 animate-spin [animation-iteration-count:1] bg-green-500 text-white rounded-full p-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>` :
-            `<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500 mt-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            `<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white bg-red-500 rounded-full mt-4 animate-spin [animation-iteration-count:1]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>`
           }

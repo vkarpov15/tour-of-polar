@@ -1,10 +1,4 @@
-import { Oso } from 'oso-cloud';
-import {
-  configureDevServer,
-  getEphemeralOsoKey
-} from '@osohq/dev-server';
-
-let oso = null;
+import getOso from '../../src/oso.mjs';
 
 /**
  * This endpoint initializes a local Oso dev server, points an Oso Cloud client to the
@@ -54,11 +48,7 @@ export default async function exec(req, res) {
       }
     }
 
-    if (!oso) {
-      await configureDevServer();
-      const { url, apiKey } = await getEphemeralOsoKey();
-      oso = new Oso(url, apiKey);
-    }
+    const oso = await getOso();
 
     await oso.policy(code);
 
@@ -67,6 +57,7 @@ export default async function exec(req, res) {
 
     res.status(200).json({ authorizeResult });
   } catch (err) {
+    console.log(err.stack);
     res.status(500).json({
       message: "Error",
       error: err.message

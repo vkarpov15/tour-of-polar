@@ -120,11 +120,13 @@
           <div class="absolute left-2 top-1 font-bold">Policy</div>
           <div id="editor" class="h-full w-1/2 pt-8"></div>
           <div id="drag-bar-policy" class="bg-gray-300 dark:bg-gray-700"></div>
-          <div id="facts" class="h-full w-1/2 flex flex-col bg-white dark:bg-gray-900">
+          <div id="facts" class="h-full w-1/2 flex flex-col bg-white dark:bg-gray-900 overflow-y-scroll">
             <h2 class="font-bold bg-[#f7f7f7] dark:bg-gray-800 h-8 px-2 pt-1">Facts</h2>
             <div class="flex gap-2 mt-2 px-2">
-              <input id="factInput" type="text" class="flex-grow border border-gray-300 rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter fact">
-              <button onclick="addFact()" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 dark:bg-indigo-800 dark:hover:bg-indigo-700">Add</button>
+              <!-- <input id="factInput" type="text" class="flex-grow border border-gray-300 rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter fact"> -->
+              <select id="factTypeSelect" class="h-8 self-start border border-gray-300 rounded px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Fact Type"></select>
+              <div class="flex flex-col gap-2" id="factArgs"></div>
+              <button onclick="addFact()" class="h-8 self-start bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-500 dark:bg-indigo-800 dark:hover:bg-indigo-700">Add</button>
             </div>
             <div id="factList" class="mt-4 flex flex-col gap-2 px-2"></div>
           </div>
@@ -155,10 +157,26 @@ let currentChapter = Object.keys(content)[0];
 let currentPage = 0;
 
 let contextFacts = [];
+let factTypes = {};
 
 function addFact() {
-  const input = document.getElementById('factInput');
-  const fact = input.value.trim();
+  const factTypeSelect = document.getElementById('factTypeSelect');
+  const predicate = factTypeSelect.value;
+  const factTypeParams = factTypes[predicate];
+  let fact = [predicate];
+  let inputsToReset = [];
+  for (let i = 0; i < factTypeParams.length; ++i) {
+    const arg = factTypeParams[i];
+    const type = document.getElementById(`selectFactParam${i}`).value;
+    if (document.getElementById(`inputFactParamId${i}`)) {
+      const id = document.getElementById(`inputFactParamId${i}`).value;
+      fact.push(`${type}:${id}`);
+      inputsToReset.push(document.getElementById(`inputFactParamId${i}`));
+    } else {
+      fact.push(type);
+    }
+  }
+  fact = fact.join(' ');
   if (fact) {
     const parsedFact = parseFactOrQuery(fact);
     const errorDiv = document.getElementById('factError');
@@ -180,7 +198,7 @@ function addFact() {
     }
 
     contextFacts.push(parsedFact);
-    input.value = '';
+    inputsToReset.forEach(input => input.value = '');
     updateFactList();
   }
 }
@@ -236,7 +254,6 @@ function previousPage() {
     return;
   }
   contextFacts = [];
-  document.getElementById('factInput').value = '';
   updateFactList();
   updatePage(true);
 
@@ -253,7 +270,6 @@ function nextPage() {
     return;
   }
   contextFacts = [];
-  document.getElementById('factInput').value = '';
   updateFactList();
   updatePage(true);
 
@@ -272,6 +288,8 @@ function updatePage(pushState) {
     history.pushState(null, '', `${__BASE_PATH__}/${chapterSlug}/${currentPage + 1}`);
   }
   cm.focus();
+
+  getFactTypes();
 }
 
 function updatePageDisplay() {
@@ -302,6 +320,50 @@ function updatePageDisplay() {
     updateFactList();
   }
 }
+
+async function getFactTypes() {
+  const factArgsDiv = document.getElementById('factArgs');
+  factArgsDiv.innerHTML = '';
+  const code = cm.getValue();
+  const response = await fetch(`${__BASE_PATH__}/api/getFactTypes`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ code })
+  });
+  factTypes = await response.json().then(res => res.factSuggestions);
+
+  const factSelect = document.getElementById('factTypeSelect');
+  factSelect.innerHTML = '<option value="" disabled selected>Fact Type</option>';
+  for (const type in factTypes) {
+    const option = document.createElement('option');
+    option.value = type;
+    option.textContent = type;
+    factSelect.appendChild(option);
+  }
+}
+
+const factSelect = document.getElementById('factTypeSelect');
+factSelect.addEventListener('change', function onSelectFactType() {
+  const selectedType = factSelect.value;
+  const selectedParams = factTypes[selectedType];
+  const factArgsDiv = document.getElementById('factArgs');
+
+  factArgsDiv.innerHTML = selectedParams.map((param, index) => {
+    return param[0]?.kind === 'symbol'
+      ? `
+        <div>
+          <select id="selectFactParam${index}" class="h-8 border bg-white border-gray-300 rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-200 dark:disabled:bg-gray-900"${param.length <= 1 ? ' disabled' : ''}>
+            ${param.map(option => `<option value="${option.value}">${option.value}</option>`).join('')}
+          </select> : <input id="inputFactParamId${index}" type="text" class="h-8 border bg-white border-gray-300 w-20 rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-200">
+        </div>
+      `
+      : `<select id="selectFactParam${index}" class="h-8 border bg-white border-gray-300 rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-200 dark:disabled:bg-gray-900"${param.length <= 1 ? ' disabled' : ''}>
+          ${param.map(option => `<option value="${option.value}">${option.value}</option>`).join('')}
+        </select>`;
+  }).join('');
+});
 
 async function runCode() {
   const runButton = document.getElementById('runButton');
@@ -419,6 +481,8 @@ const cm = CodeMirror(document.getElementById("editor"), {
     }
   }
 });
+
+getFactTypes();
 
 // Check for dark mode preference
 if (localStorage.getItem('darkMode') === 'true' ||
@@ -581,13 +645,6 @@ function toggleDarkMode() {
 document.getElementById('authorizeQuery').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     runCode();
-  }
-});
-
-// Add event listener for Enter key in facts input
-document.getElementById('factInput').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    addFact();
   }
 });
 

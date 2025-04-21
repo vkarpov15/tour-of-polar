@@ -150,6 +150,33 @@
       </div>
     </div>
   </div>
+
+  <div id="imageModal" class="fixed inset-0 z-10 w-screen overflow-y-auto hidden bg-gray-300 dark:bg-gray-700 bg-opacity-40 dark:bg-opacity-40">
+    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0" onclick="if(event.target === this) closeImageModal()">
+      <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:p-6">
+        <div class="absolute top-4 right-4">
+          <button onclick="closeImageModal()" class="text-gray-500 hover:text-gray-800 transition duration-150 ease-in-out">
+            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <img id="modalImage" class="max-w-[75vw] max-h-[75vh] object-cover">
+      </div>
+    </div>
+  </div>
+  <script>
+    function closeImageModal() {
+      const modal = document.getElementById('imageModal');
+      modal.classList.add('hidden');
+    }
+    function openImageModal(src) {
+      const modal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('modalImage');
+      modalImg.src = src;
+      modal.classList.remove('hidden');
+    }
+  </script>
 </body>
 
 <script>

@@ -10,7 +10,8 @@ const content = [
   <p class="mt-2">The tour is divided into a list of modules that you can access by clicking on <a class="text-indigo-500">A Tour of Polar</a> on the top left of the page. You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
   <p class="mt-2">The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
   <p class="mt-2">Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a minimal policy which indicates that users can read items if they are an admin.</p>
-  <img class="mx-auto my-2 w-2/3" src="https://www.osohq.com/docs/_next/image?url=%2Fdocs%2F_next%2Fstatic%2Fmedia%2Farchitecture-diagrams-final2.eb1c3262.png&w=3840&q=75">
+  <p class="mt-2">Facts define authorization data. This example has one fact by default: user 'alice' has the 'admin' role on the item 'foo'. According to the policy, this means Alice can read Item 'foo'.</p>
+  <img class="mx-auto my-2 w-2/3 cursor-pointer" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/architecture-diagrams-white.png" onclick="openImageModal(this.src)">
   <p class="mt-2">Click "Authorize" to execute the authorization query with the provided policy. You should see "Result: allowed" in the results panel once the policy has been run, which means the authorization query succeeded.</p>
 </div>
     `,
@@ -37,17 +38,18 @@ resource Item {
     text: `
 <h1 class="text-xl mt-4 mb-2">Basic Rules</h1>
 <div class="flex flex-col gap-2">
-<p>Now that you've seen how to define resources in Polar, let's learn how roles and permissions work together in a Polar policy.</p>
-<p>
-  The code on the right demonstrates a common pattern - an Item resource that has:
-</p>
-<ul class="list-disc list-inside">
-  <li>Defined roles (viewer, owner)</li>
-  <li>Defined permissions (view, edit)</li>
-  <li>Rules mapping roles to permissions</li>
-</ul>
-<p>This introduces two key concepts - using roles to group related permissions, and defining rules to determine when permissions are granted.</p>
-<p>Try running the code! You should see that the policy executed successfully.</p>
+  <p>Now that you've seen how to define resources in Polar, let's learn how roles and permissions work together in a Polar policy.</p>
+  <p>
+    The code on the right demonstrates a common pattern - an Item resource that has:
+  </p>
+  <ul class="list-disc list-inside">
+    <li>Defined roles (viewer, owner)</li>
+    <li>Defined permissions (view, edit)</li>
+    <li>Rules mapping roles to permissions</li>
+  </ul>
+  <p>This introduces two key concepts - using roles to group related permissions, and defining rules to determine when permissions are granted.</p>
+  <p>This example has two facts by default: user 'alice' has the 'owner' role on the Item 'test', and user 'bob' has the 'viewer' role on the Item 'test'. According to the policy, this means Alice can both view and edit the test item, while Bob can only view it.</p>
+  <p>Try running the authorize query! You should see that user 'alice' has permission to view the item.</p>
 </div>
     `,
     code: `
@@ -93,7 +95,14 @@ resource Item {
       <li>Role inheritance from organizations</li>
       <li>Testing that permissions work correctly across resources</li>
     </ul>
-    <p class="mt-2">Take a look at the tests to understand how resource-specific roles enable fine-grained access control, and run them to validate that the policy works correctly!</p>
+    <p class="mt-2">This example has three facts by default:</p>
+    <ul class="list-disc list-inside mt-2">
+      <li>User 'alice' has the 'member' role on Organization 'acme'</li>
+      <li>Repository 'anvil' belongs to Organization 'acme'</li>
+      <li>Repository 'bar' belongs to Organization 'foo'</li>
+    </ul>
+    <p class="mt-2">According to the policy, this means Alice inherits the member role on Repository 'anvil' through the organization relationship, giving her read access to that repository.</p>
+    <p class="mt-2">Try running the authorize query to confirm that Alice has read access to Repository 'anvil'!</p>
   </div>
       `,
       code: `
@@ -158,7 +167,8 @@ has_role(user: User, role: String, repository: Repository) if
     <li>Inheritance between global and resource-specific roles</li>
     <li>Testing global role permissions</li>
   </ul>
-  <p>Try running the test to validate that the policy works correctly, and take a look at the test to understand how global roles enable system-wide access control!</p>
+  <p>This example has two facts by default: user 'alice' has the 'superadmin' role globally, and user 'bob' has the 'member' role on Organization 'acme'. According to the policy, this means Alice has admin access to all organizations, while Bob can only read the acme organization.</p>
+  <p>Try running the authorization query to validate that Alice can read any organization!</p>
 </div>
     `,
     code: `
@@ -208,7 +218,15 @@ resource Organization {
     <li>Two-way role inheritance between resources</li>
     <li>Testing inheritance behavior</li>
   </ul>
-  <p>Take a look at the test to understand how role inheritance works across resources, and run it to validate that the policy works correctly!</p>
+  <p>This example has four facts by default:</p>
+  <ul class="list-disc list-inside">
+    <li>user 'alice' has the 'reader' role on Repository 'anvil'</li>
+    <li>Folder 'python' belongs to Repository 'anvil'</li>
+    <li>Folder 'tests' is inside Folder 'python'</li>
+    <li>File <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">test.py</code> is inside Folder 'tests'</li>
+  </ul>
+  <p>According to the policy, this means Alice inherits read access down through the folder hierarchy to the test.py file.</p>
+  <p>Try running the authorization query to verify that Alice can read <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">test.py</code> through role inheritance from the repository!</p>
 </div>
     `,
     code: `
@@ -268,7 +286,14 @@ resource File {
     <li>Repository maintainers can close but not update issues</li>
     <li>Both creators and admins can read and comment on issues</li>
   </ul>
-  <p>Take a look at the tests to understand how issue ownership and permissions work, and run them to validate that the policy works correctly!</p>
+  <p>This example has three facts by default:</p>
+  <ul class="list-disc list-inside">
+    <li>Issue '537' belongs to Repository 'anvil'</li>
+    <li>User 'alice' is the creator of Issue '537'</li>
+    <li>User 'bob' has the 'maintainer' role on Repository 'anvil'</li>
+  </ul>
+  <p>According to the policy, this means Alice can update and close the issue as its creator, while Bob can close but not update it as a repository maintainer.</p>
+  <p>Try running the authorization query to confirm that Alice can close <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Issue:537</code> since she is the creator of the issue!</p>
 </div>
       `,
       code: `
@@ -329,7 +354,8 @@ resource Issue {
     <li>Using permissions to control who can share resources</li>
     <li>Testing that sharing permissions work correctly</li>
   </ul>
-  <p>Take a look at the test to understand how resource sharing works, and run it to validate that the policy works correctly!</p>
+  <p>This example has two facts by default: user 'alice' has the 'admin' role on Repository 'anvil', and user 'bob' has the 'reader' role on Repository 'anvil'. According to the policy, this means Alice can read and invite others to the repository, while Bob can only read it.</p>
+  <p>Try running the authorization query to confirm that Alice can invite others to <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Repository:anvil</code> since she has the admin role!</p>
 </div>
     `,
     code: `
@@ -366,9 +392,11 @@ resource Repository {
     <li>Users are assigned roles on organizations they belong to</li>
     <li>Admin role inherits all member permissions</li>
     <li>Different permissions are granted to different roles</li>
-    <li>Tests verify role-based access controls work correctly</li>
+    <li>Roles control what actions users can perform</li>
   </ul>
-  <p>Take a look at the test to understand how organization-level roles work - it shows that members can read organizations and repositories but cannot delete repositories or access other organizations. Run the test to validate that the policy works correctly!</p>
+  <p>According to the policy, organization members can read organizations and repositories but cannot delete repositories or access other organizations. Admin users have additional permissions like adding members and deleting repositories.</p>
+  <p>This example has one fact by default: user 'alice' has the 'member' role on Organization 'acme'. According to the policy, this means Alice can read the organization and its repositories but cannot perform admin actions like adding members or deleting repositories.</p>
+  <p>Try running the authorization query to validate that Alice can read <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Organization:acme</code> with her member role!</p>
 </div>
     `,
     code: `
@@ -419,7 +447,16 @@ resource Organization {
     <li>Inheriting permissions on repositories</li>
     <li>Careful exposure of permissions to users</li>
   </ul>
-  <p>Take a look at the test to understand how custom roles provide flexible access control, and run it to validate that the policy works correctly!</p>
+  <p>This example has five facts by default:</p>
+  <ul class="list-disc list-inside">
+    <li>The 'repo-admin' role grants repository.read permission</li>
+    <li>The 'repo-admin' role grants repository.create permission</li>
+    <li>The 'repo-admin' role grants repository.delete permission</li>
+    <li>User 'alice' has the 'repo-admin' role on Organization 'acme'</li>
+    <li>Repository 'anvil' belongs to Organization 'acme'</li>
+  </ul>
+  <p>According to the policy, this means Alice has full repository management permissions within the acme organization through her custom repo-admin role.</p>
+  <p>Try running the authorization query to validate that Alice can create repositories in the acme organization through her repo-admin role!</p>
 </div>
     `,
     code: `
@@ -493,14 +530,22 @@ resource Repository {
   </div>
   <p class="mt-2">Relationship-based access control (ReBAC) means organizing permissions based on relationships between resources. Let's look at a basic example involving groups and repositories.</p>
   <p class="mt-2">So far, your policies have only had one type of actor: a user. This policy has two actors: users and groups.</p>
-  <p class="mt-2">There is a <code>has_group()</code> fact that determines whether a user belongs to a group. You can think of <code>has_group()</code> as a relationship between a user and a group.</p>
+  <p class="mt-2">There is a <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">has_group()</code> fact that determines whether a user belongs to a group. You can think of <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">has_group()</code> as a relationship between a user and a group.</p>
   <p class="mt-2">In the code on the right:</p>
   <ul class="list-disc list-inside mt-2">
     <li>Users can inherit roles from groups they belong to</li>
     <li>The Repository resource defines a reader role</li>
-    <li>In the test block, the group <code>anvil-readers</code> has the reader role on the <code>anvil</code> repository</li>
+    <li>In the test block, the group <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">anvil-readers</code> has the reader role on the <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">anvil</code> repository</li>
   </ul>
-  <p class="mt-2">Take a look at the test to understand how relationship inheritance works, and run it to validate that the policy works correctly!</p>
+  <p class="mt-2">This example has four facts by default:</p>
+  <ul class="list-disc list-inside mt-2">
+    <li>The group 'anvil-readers' has the 'reader' role on Repository 'anvil'</li>
+    <li>User 'alice' belongs to the 'anvil-readers' group</li>
+    <li>User 'bob' belongs to the 'anvil-readers' group</li>
+    <li>User 'charlie' belongs to the 'anvil-readers' group</li>
+  </ul>
+  <p class="mt-2">According to the policy, this means all three users inherit read access to the anvil repository through their group membership.</p>
+  <p class="mt-2">Try running the authorization query to validate that Alice can read the repository through her group membership!</p>
 </div>
     `,
     code: `
@@ -557,7 +602,14 @@ has_role(user: User, role: String, resource: Resource) if
       <li>Combining relationships with role-based permissions</li>
       <li>Testing different permission combinations</li>
     </ul>
-    <p>Take a look at the test to understand how user-resource relationships work, and run it to validate that the policy works correctly!</p>
+    <p>This example has three facts by default:</p>
+    <ul class="list-disc list-inside">
+      <li>Issue '537' belongs to Repository 'anvil'</li>
+      <li>User 'alice' is the creator of Issue '537'</li>
+      <li>User 'bob' has the 'maintainer' role on Repository 'anvil'</li>
+    </ul>
+    <p>According to the policy, this means Alice can close the issue as its creator, while Bob can close it as a repository maintainer.</p>
+    <p>Try running the authorization query to validate that Alice can close <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Issue:537</code> as its creator!</p>
   </div>
     `,
     code: `
@@ -610,7 +662,15 @@ resource Issue {
     <li>Recursive role inheritance from parent to child folders</li>
     <li>Testing permissions across nested resources</li>
   </ul>
-  <p>Take a look at the test to understand how file/folder hierarchies work, and run it to validate that the policy works correctly!</p>
+  <p>This example has four facts by default:</p>
+  <ul class="list-disc list-inside">
+    <li>User 'alice' has the 'reader' role on Repository 'anvil'</li>
+    <li>Folder 'python' belongs to Repository 'anvil'</li>
+    <li>Folder 'tests' is inside Folder 'python'</li>
+    <li>File <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">test.py</code> is inside Folder 'tests'</li>
+  </ul>
+  <p>According to the policy, this means Alice inherits read access down through the folder hierarchy to the <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">test.py</code> file.</p>
+  <p>Try running the authorization query to validate that Alice can read <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">test.py</code> file through role inheritance from the repository down through the folder hierarchy!</p>
 </div>
       `,
       code: `
@@ -676,7 +736,14 @@ resource File {
       <li>Restricting access to sensitive operations</li>
       <li>Testing impersonation flows</li>
     </ul>
-    <p>Take a look at the test to understand how impersonation works, and run it to validate that the policy works correctly!</p>
+    <p>This example has three facts by default:</p>
+    <ul class="list-disc list-inside">
+      <li>user 'alice' has the 'support' role globally</li>
+      <li>user 'bob' has the 'admin' role on Organization 'acme'</li>
+      <li>user 'alice' is currently impersonating user 'bob'</li>
+    </ul>
+    <p>According to the policy, this means Alice can read the acme organization by impersonating Bob who has admin access.</p>
+    <p>Try running the authorization query to confirm that Alice can read <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Repository:anvil</code> by impersonating Bob, who has admin access!</p>
   </div>
       `,
       code: `
@@ -737,7 +804,15 @@ allow(user: User, action: String, resource: Resource) if
       <li>Recursive role inheritance for multi-level hierarchies</li>
       <li>Testing manager access to employee repositories</li>
     </ul>
-    <p>Take a look at the test to understand how organization hierarchies work, and run it to validate that the policy works correctly!</p>
+    <p>This example has four facts by default:</p>
+    <ul class="list-disc list-inside">
+      <li>Alice created Repository Acme</li>
+      <li>Bhav is Alice's direct manager</li>
+      <li>Crystal is Bhav's direct manager</li>
+      <li>Fergie also reports to Crystal</li>
+    </ul>
+    <p>According to the policy, this means Bhav can read Alice's repository through the management chain, while Crystal can read it through recursive inheritance.</p>
+    <p>Try running the authorization query to confirm that Bhav can read <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Repository:acme</code> because he is Alice's manager!</p>
   </div>
     `,
     code: `
@@ -793,9 +868,10 @@ resource Repository {
   <ul class="list-disc list-inside mt-2">
     <li>The Repository resource has a read permission</li>
     <li>We define a rule that allows anyone to read public repositories</li>
-    <li>The test verifies that any user can read a public repository</li>
+    <li>Any user can read a public repository</li>
   </ul>
-  <p class="mt-2">Take a look at the test to understand how public repositories work, and run it to validate that the policy works correctly!</p>
+  <p class="mt-2">This example has one fact by default: Repository 'anvil' is marked as public. According to the policy, this means anyone can read the repository since it is public.</p>
+  <p class="mt-2">Try running the authorization query to confirm that Alice can read <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Repository:anvil</code> since it is marked as public!</p>
 </div>
     `,
     code: `
@@ -828,7 +904,14 @@ resource Repository {
       <li>Controlling who can configure default roles</li>
       <li>Testing default role inheritance</li>
     </ul>
-    <p>Take a look at the test to understand how conditional roles enable flexible defaults, and run it to validate that the policy works correctly!</p>
+    <p>This example has three facts by default:</p>
+    <ul class="list-disc list-inside">
+      <li>Organization 'acme' has 'editor' as its default role</li>
+      <li>User 'alice' has the 'member' role on Organization 'acme'</li>
+      <li>Repository 'anvil' belongs to Organization 'acme'</li>
+    </ul>
+    <p>According to the policy, this means Alice inherits the editor role on the anvil repository through her membership in the acme organization and its default role settings.</p>
+    <p>Try running the authorization query to confirm that Alice can write to <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Repository:anvil</code> through the editor role she inherits from the acme organization's default role settings!</p>
   </div>
     `,
     code: `
@@ -878,7 +961,14 @@ has_role(actor: Actor, role: String, repo: Repository) if
       <li>Repositories inherit roles from organizations unless the repository is protected</li>
       <li>Explicit roles on the repository override protected repositories</li>
     </ul>
-    <p>Take a look at the test to understand how repository toggles work, and run it to validate that the policy works correctly!</p>
+    <p>This example has four facts by default:</p>
+    <ul class="list-disc list-inside">
+      <li>User 'alice' has the 'member' role on Organization 'acme'</li>
+      <li>Repository 'anvil' belongs to Organization 'acme'</li>
+      <li>Repository 'website' belongs to Organization 'acme'</li>
+      <li>Repository 'anvil' is marked as protected</li>
+    </ul>
+    <p>Try running the authorization query to confirm that Alice can read <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Repository:website</code> since the website repository is not marked as protected while <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Repository:anvil</code> is!</p>
   </div>
       `,
       code: `
@@ -934,7 +1024,8 @@ has_role(actor: Actor, role: String, repository: Repository) if
     <li>Comparing expiration times against current time</li>
     <li>Testing expired vs unexpired access</li>
   </ul>
-  <p>Take a look at the test to understand how time-based access works, and run it to validate that the policy works correctly!</p>
+  <p>This example has two facts by default: user 'alice' has the 'member' role on Repository 'anvil' with a future expiration time, and user 'bob' has the 'member' role on Repository 'anvil' with an expiration time in the past. According to the policy, this means Alice still has access while Bob's access has expired.</p>
+  <p>Try running the authorization query to confirm that Alice can read <code class="bg-gray-50 rounded-md border border-gray-200 text-sm px-[0.25em] py-0.5">Repository:anvil</code> since her role has not yet expired!</p>
 </div>
       `,
       code: `

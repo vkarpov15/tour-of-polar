@@ -1,3 +1,4 @@
+import enqueue from '../../src/enqueue.mjs';
 import getOso from '../../src/oso.mjs';
 
 /**
@@ -12,10 +13,13 @@ export default async function getFactTypes(req, res) {
     }
 
     const oso = await getOso();
-
-    await oso.policy(code);
-    const autocompleteInfo = await oso.api._get('/autocomplete_info');
-    const factSuggestions = getFactSuggestions(autocompleteInfo);
+    // Critical path: ensure no other function call overwrites the policy while it is being used.
+    const { autocompleteInfo, factSuggestions } = await enqueue(async () => {
+      await oso.policy(code);
+      const autocompleteInfo = await oso.api._get('/autocomplete_info');
+      const factSuggestions = getFactSuggestions(autocompleteInfo);
+      return { autocompleteInfo, factSuggestions };
+    });
 
     res.status(200).json({ autocompleteInfo, factSuggestions });
   } catch (err) {

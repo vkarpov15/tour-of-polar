@@ -1,3 +1,4 @@
+import enqueue from '../../src/enqueue.mjs';
 import getOso from '../../src/oso.mjs';
 
 /**
@@ -50,10 +51,11 @@ export default async function exec(req, res) {
 
     const oso = await getOso();
 
-    await oso.policy(code);
-
-    console.log(authorizeQuery, contextFacts);
-    const authorizeResult = authorizeQuery ? await oso.authorize(...authorizeQuery, contextFacts) : null;
+    const authorizeResult = await enqueue(async () => {
+      await oso.policy(code);
+      const authorizeResult = authorizeQuery ? await oso.authorize(...authorizeQuery, contextFacts) : null;
+      return authorizeResult;
+    });
 
     res.status(200).json({ authorizeResult });
   } catch (err) {

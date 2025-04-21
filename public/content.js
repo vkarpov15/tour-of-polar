@@ -6,8 +6,8 @@ const content = [
   <div class="float-left mr-4">
     <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/bear1.png" />
   </div>
-  <p>Welcome to a tour of the <a class="text-indigo-500" href="https://www.osohq.com/docs/oss/reference/polar.html">Polar authorization language.</a></p>
-  <p class="mt-2">The tour is divided into a list of modules that you can access by clicking on <a class="text-indigo-500">A Tour of Polar</a> on the top left of the page. You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
+  <p>Welcome to a tour of the <a class="text-oso-purple-500" href="https://www.osohq.com/docs/oss/reference/polar.html">Polar authorization language.</a></p>
+  <p class="mt-2">The tour is divided into a list of modules that you can access by clicking on <a class="text-oso-purple-500">A Tour of Polar</a> on the top left of the page. You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
   <p class="mt-2">The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
   <p class="mt-2">Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a minimal policy which indicates that users can read items if they are an admin.</p>
   <p class="mt-2">Facts define authorization data. This example has one fact by default: user 'alice' has the 'admin' role on the item 'foo'. According to the policy, this means Alice can read Item 'foo'.</p>
@@ -1136,10 +1136,10 @@ plan_quota(Plan{"basic"}, Feature{"repository"}, 0);
     </ul>
     <p class="mt-2">To continue your authorization journey:</p>
     <ul class="list-disc list-inside mt-2">
-      <li>Visit the <a class="text-indigo-500" href="https://www.osohq.com/docs">Oso documentation</a> to dive deeper into authorization concepts</li>
-      <li>Check out the <a class="text-indigo-500" href="https://www.osohq.com/docs/guides">guides and tutorials</a> for practical examples</li>
-      <li>Join the <a class="text-indigo-500" href="https://join-slack.osohq.com/">Oso Slack community</a> to connect with other developers</li>
-      <li>Browse example <a class="text-indigo-500" href="https://github.com/osohq">projects on GitHub</a> to see authorization in action</li>
+      <li>Visit the <a class="text-oso-purple-500" href="https://www.osohq.com/docs">Oso documentation</a> to dive deeper into authorization concepts</li>
+      <li>Check out the <a class="text-oso-purple-500" href="https://www.osohq.com/docs/guides">guides and tutorials</a> for practical examples</li>
+      <li>Join the <a class="text-oso-purple-500" href="https://join-slack.osohq.com/">Oso Slack community</a> to connect with other developers</li>
+      <li>Browse example <a class="text-oso-purple-500" href="https://github.com/osohq">projects on GitHub</a> to see authorization in action</li>
     </ul>
     <p class="mt-2">Remember that building robust authorization is an iterative process. Start simple and add complexity as your needs evolve.</p>
     <p class="mt-2">Thank you for taking the tour!</p>

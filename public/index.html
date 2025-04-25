@@ -38,7 +38,6 @@
     // Update href attributes after base path is defined
     window.addEventListener('DOMContentLoaded', () => {
       if (__BASE_PATH__ !== '') {
-        document.getElementById('logo-link').href = __BASE_PATH__ + '/';
         document.getElementById('list-link').href = __BASE_PATH__ + '/list';
       }
     });

@@ -2,7 +2,7 @@
   "name": "tour-of-polar",
   "version": "0.1.0",
   "dependencies": {
-    "@mongoosejs/studio": "0.0.70",
+    "@mongoosejs/studio": "0.0.72",
     "@osohq/dev-server": "*",
     "mongoose": "^8.13",
     "next": "15.2.x",

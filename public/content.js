@@ -6,17 +6,18 @@ const content = [
   <div class="float-left mr-4">
     <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/bear1.png" />
   </div>
-  <p>Welcome to a tour of the <a class="text-oso-purple-500" href="https://www.osohq.com/docs/oss/reference/polar.html">Polar authorization language.</a></p>
+  <p>Welcome to a tour of the <a class="text-oso-purple-500" href="https://www.osohq.com/docs/modeling-in-polar/reference">Polar authorization language.</a></p>
   <p class="mt-2">The tour is divided into a list of modules that you can access by clicking on <a class="text-oso-purple-500">A Tour of Polar</a> on the top left of the page. You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
   <p class="mt-2">The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
   <p class="mt-2">Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a minimal policy which indicates that users can read items if they are an admin.</p>
   <p class="mt-2">Facts define authorization data. This example has one fact by default: user 'alice' has the 'admin' role on the item 'foo'. According to the policy, this means Alice can read Item 'foo'.</p>
-  <img class="mx-auto my-2 w-2/3 cursor-pointer" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/architecture-diagrams-white.png" onclick="openImageModal(this.src)">
+  <img class="mx-auto my-2 w-2/3 cursor-pointer dark:bg-gray-400 rounded-md" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/architecture-diagrams-white.png" onclick="openImageModal(this.src)">
   <p class="mt-2">Click "Authorize" to execute the authorization query with the provided policy. You should see "Result: allowed" in the results panel once the policy has been run, which means the authorization query succeeded.</p>
 </div>
     `,
     code: `
 actor User {}
+
 resource Item {
   permissions = ["read"];
   roles = ["admin"];
@@ -54,6 +55,7 @@ resource Item {
     `,
     code: `
 actor User {}
+
 resource Item {
   roles = ["viewer", "owner"];
   permissions = ["view", "edit"];
@@ -106,7 +108,7 @@ resource Item {
   </div>
       `,
       code: `
-actor User { }
+actor User {}
 
 resource Organization {
   roles = ["admin", "member"];
@@ -297,7 +299,7 @@ resource File {
 </div>
       `,
       code: `
-actor User { }
+actor User {}
 
 resource Repository {
   roles = ["maintainer"];
@@ -359,7 +361,7 @@ resource Issue {
 </div>
     `,
     code: `
-actor User { }
+actor User {}
 
 resource Repository {
   roles = ["reader", "admin"];
@@ -400,7 +402,7 @@ resource Repository {
 </div>
     `,
     code: `
-actor User { }
+actor User {}
 
 resource Organization {
   roles = ["admin", "member"];
@@ -460,8 +462,8 @@ resource Organization {
 </div>
     `,
     code: `
-actor User { }
-actor Role { }
+actor User {}
+actor Role {}
 
 resource Organization {
   roles = ["admin", "member"];
@@ -558,10 +560,9 @@ has_role(user: User, role: String, resource: Resource) if
   # the group has role on resource
   has_role(group, role, resource);
 
-actor User { }
-
+actor User {}
 # A group is a kind of actor
-actor Group { }
+actor Group {}
 
 resource Repository {
   roles = ["reader"];
@@ -613,7 +614,7 @@ has_role(user: User, role: String, resource: Resource) if
   </div>
     `,
     code: `
-actor User { }
+actor User {}
 
 resource Repository {
   roles = ["maintainer"];
@@ -674,7 +675,7 @@ resource Issue {
 </div>
       `,
       code: `
-actor User { }
+actor User {}
 
 resource Repository {
   roles = ["reader", "maintainer"];
@@ -875,7 +876,8 @@ resource Repository {
 </div>
     `,
     code: `
-actor User { }
+actor User {}
+
 resource Repository {
   permissions = ["read"];
 
@@ -972,7 +974,7 @@ has_role(actor: Actor, role: String, repo: Repository) if
   </div>
       `,
       code: `
-actor User { }
+actor User {}
 
 resource Organization {
   roles = ["member"];
@@ -1029,7 +1031,7 @@ has_role(actor: Actor, role: String, repository: Repository) if
 </div>
       `,
       code: `
-actor User { }
+actor User {}
 
 resource Repository {
   roles = ["member"];
@@ -1069,7 +1071,7 @@ has_role(actor: Actor, role: String, repo: Repository) if
   </div>
       `,
       code: `
-actor User { }
+actor User {}
 
 resource Organization {
   roles = ["admin", "member"];

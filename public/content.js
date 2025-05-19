@@ -6,7 +6,9 @@ const content = [
   <div class="float-left mr-4">
     <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/bear1.png" />
   </div>
-  <p>Welcome to a tour of the <a class="text-oso-purple-500" href="https://www.osohq.com/docs/modeling-in-polar/reference">Polar authorization language.</a></p>
+  <p>👋 Welcome! This is an interactive playground to learn how authorization works using Oso and <a class="text-oso-purple-500" href="https://www.osohq.com/docs/modeling-in-polar/reference">Polar authorization language.</a></p>
+  <p class="mt-2">Want to get started? Click <span class="font-bold">authorize</span> on the right to see if the authorization check succeeded. Modify the policy and facts to try it out!</p>
+  <h2 class="text-lg font-bold mt-4">More Info</h2>
   <p class="mt-2">The tour is divided into a list of modules that you can access by clicking on <a class="text-oso-purple-500">A Tour of Polar</a> on the top left of the page. You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
   <p class="mt-2">The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
   <p class="mt-2">Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a minimal policy which indicates that users can read items if they are an admin.</p>

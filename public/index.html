@@ -333,16 +333,6 @@ function updatePage(pushState) {
   }
   cm.focus();
 
-  setTimeout(() => {
-    if (document.querySelector('#moreContentOpen')) {
-      document.querySelector('#moreContentOpen').addEventListener('click', function() {
-        track('READ_MORE');
-        document.querySelector('#moreContent').classList.remove('hidden');
-        document.querySelector('#moreContentOpen').classList.add('hidden');
-      });
-    }
-  }, 0);
-
   getFactTypes();
 }
 
@@ -397,16 +387,6 @@ async function getFactTypes() {
     factSelect.appendChild(option);
   }
 }
-
-setTimeout(() => {
-  if (document.querySelector('#moreContentOpen')) {
-    document.querySelector('#moreContentOpen').addEventListener('click', function() {
-      track('READ_MORE');
-      document.querySelector('#moreContent').classList.remove('hidden');
-      document.querySelector('#moreContentOpen').classList.add('hidden');
-    });
-  }
-}, 0);
 
 const factSelect = document.getElementById('factTypeSelect');
 factSelect.addEventListener('change', function onSelectFactType() {

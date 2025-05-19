@@ -7,12 +7,19 @@ const content = [
     <img class="w-48 inline rounded-md shadow-md dark:border dark:border-gray-700" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/bear1.png" />
   </div>
   <p>Welcome to a tour of the <a class="text-oso-purple-500" href="https://www.osohq.com/docs/modeling-in-polar/reference">Polar authorization language.</a></p>
-  <p class="mt-2">The tour is divided into a list of modules that you can access by clicking on <a class="text-oso-purple-500">A Tour of Polar</a> on the top left of the page. You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
-  <p class="mt-2">The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
-  <p class="mt-2">Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a minimal policy which indicates that users can read items if they are an admin.</p>
-  <p class="mt-2">Facts define authorization data. This example has one fact by default: user 'alice' has the 'admin' role on the item 'foo'. According to the policy, this means Alice can read Item 'foo'.</p>
-  <img class="mx-auto my-2 w-2/3 cursor-pointer dark:bg-gray-400 rounded-md" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/architecture-diagrams-white.png" onclick="openImageModal(this.src)">
-  <p class="mt-2">Click "Authorize" to execute the authorization query with the provided policy. You should see "Result: allowed" in the results panel once the policy has been run, which means the authorization query succeeded.</p>
+  <p class="mt-1">Click <span class="font-bold">Authorize</span> to see if access is granted. Modify the rules and facts to learn!</p>
+
+  <button id="moreContentOpen" class="mt-1 bg-oso-purple-600 hover:bg-oso-purple-500 text-white px-4 py-2 rounded-md disabled:bg-slate-500 dark:bg-oso-purple-800 dark:hover:bg-oso-purple-700">
+    Read More
+  </button>
+  <div id="moreContent" class="hidden">
+    <p class="mt-2">The tour is divided into a list of modules that you can access by clicking on <a class="text-oso-purple-500">A Tour of Polar</a> on the top left of the page. You can also view the table of contents at any time by clicking on the menu on the top right of the page.</p>
+    <p class="mt-2">The code on the right contains a Polar policy. Polar is declarative language designed to express authorization logic in a readable, rule-based format.</p>
+    <p class="mt-2">Polar authorization requests typically take the form "Can this actor perform some action on this resource?" The code on the right contains a minimal policy which indicates that users can read items if they are an admin.</p>
+    <p class="mt-2">Facts define authorization data. This example has one fact by default: user 'alice' has the 'admin' role on the item 'foo'. According to the policy, this means Alice can read Item 'foo'.</p>
+    <img class="mx-auto my-2 w-2/3 cursor-pointer dark:bg-gray-400 rounded-md" src="https://meanitsoftware.s3.us-east-1.amazonaws.com/architecture-diagrams-white.png" onclick="openImageModal(this.src)">
+    <p class="mt-2">Click "Authorize" to execute the authorization query with the provided policy. You should see "Result: allowed" in the results panel once the policy has been run, which means the authorization query succeeded.</p>
+  </div>
 </div>
     `,
     code: `

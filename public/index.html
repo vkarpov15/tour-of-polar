@@ -733,8 +733,10 @@ function track(type, data = {}) {
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return;
   }
-  // Don't show bounce animation anymore
-  localStorage.setItem('seenRunButtonBounce', 'true');
+  if (type !== 'PAGE_LOAD') {
+    // Don't show bounce animation anymore
+    localStorage.setItem('seenRunButtonBounce', 'true');
+  }
 
   const sessionId = sessionStorage.getItem('sessionId') ||
     Math.random().toString(36).slice(2) + Date.now().toString(36);

@@ -5,7 +5,7 @@
     "@mongoosejs/studio": "^0.0.95",
     "@osohq/dev-server": "*",
     "mongoose": "^8.13",
-    "next": "15.3.x",
+    "next": "^15.3.0",
     "oso-cloud": "^2.5.2",
     "tailwindcss": "3.4.0"
   },

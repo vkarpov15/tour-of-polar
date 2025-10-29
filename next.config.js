@@ -1,6 +1,8 @@
 'use strict';
 
-module.exports = {
+const withMongooseStudio = require('@mongoosejs/studio/next');
+
+module.exports = withMongooseStudio({
   async rewrites() {
     return [
       {
@@ -17,13 +19,4 @@ module.exports = {
       }
     ];
   },
-  async redirects() {
-    return [
-      {
-        source: '/studio',
-        destination: '/studio/index.html',
-        permanent: true,
-      }
-    ];
-  }
-};
+});

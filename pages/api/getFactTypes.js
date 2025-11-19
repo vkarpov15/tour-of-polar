@@ -16,7 +16,7 @@ export default async function getFactTypes(req, res) {
     // Critical path: ensure no other function call overwrites the policy while it is being used.
     const { autocompleteInfo, factSuggestions } = await enqueue(async () => {
       await oso.policy(code);
-      const autocompleteInfo = await oso.api._get('/autocomplete_info');
+      const { result: autocompleteInfo } = await oso.api._get('/autocomplete_info');
       const factSuggestions = getFactSuggestions(autocompleteInfo);
       return { autocompleteInfo, factSuggestions };
     });

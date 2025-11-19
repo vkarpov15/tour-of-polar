@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "dependencies": {
     "@mongoosejs/studio": "^0.1.5",
-    "@osohq/dev-server": "*",
+    "@osohq/dev-server": "0.0.1-alpha.0",
     "mongoose": "^9.0.0-0",
     "next": "^15.3.0",
     "oso-cloud": "^2.5.2",
